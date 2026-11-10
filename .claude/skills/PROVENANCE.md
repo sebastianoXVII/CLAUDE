@@ -13,3 +13,10 @@ Esito del controllo: gli unici script sono quelli di superpowers.
 - Le uniche chiamate esterne sono letture pubbliche dell'API delle issue GitHub di obra/superpowers.
 
 Nessuna esfiltrazione di dati o credenziali.
+
+## Candidate valutate e scartate (find-skills, 2026-11-10)
+Il registro skills.sh non è raggiungibile da questo ambiente, quindi la ricerca è stata fatta direttamente su GitHub.
+- **agiprolabs/claude-trading-skills** (★520, un solo autore, ultimo push 2026-09-02). *Scartata.*
+  - 68 skill, quasi tutte crypto/Solana/DeFi. Le skill con codice toccano wallet, firme e swap, e sono fuori ambito.
+  - Le skill pertinenti (regime-detection, walk-forward-validation, position-sizing, slippage-modeling, market-microstructure-traditional) sono di livello retail: soglie fisse tipo "ADX > 25", nessun controllo per test multipli né significatività. Non aggiungono nulla a `research_notes/.../06_metodo_validazione.md`.
+- **Altre:** finlab-ai (★426, Taiwan), xtquantai, joinquant-skill, AliceMarket, TradingAgents-AShare (mercati e piattaforme cinesi), mql-developer (★58, MetaTrader). *Scartate:* fuori dal mercato CME, poche stelle o legate a piattaforme proprietarie.
