@@ -64,29 +64,45 @@ def _inside(c, hi, lo):
     return lo <= c <= hi
 
 
-def _sweep_and_reclaim(r, hi, lo, t0, t1, max_wait=None):
-    """Primo superamento di hi/lo in [t0, t1] e prima barra successiva (o la stessa) che chiude di nuovo dentro."""
+def _close_at(b, t):
+    """Close dell'ultima barra a 1 minuto con inizio <= t (NaN se nessuna)."""
+    s = b.loc[:t, "close"]
+    return float(s.iloc[-1]) if len(s) else np.nan
+
+
+def _starts_inside(b, t, hi, lo):
+    """Emendamento 2: lo sweep/rottura vale solo se il close della barra prima della finestra sta dentro il range."""
+    c = _close_at(b, t)
+    return not np.isnan(c) and _inside(c, hi, lo)
+
+
+def _sweep_and_reclaim(r, hi, lo, t0, t1, reclaim_until=None):
+    """Primo superamento di hi/lo con barra che inizia in [t0, t1]; poi prima barra (anche la stessa) che chiude dentro,
+    con inizio <= reclaim_until(t_sweep) (default: t1)."""
     w = r.loc[t0:t1]
     for i in range(len(w)):
         bar = w.iloc[i]
         if bar["high"] > hi or bar["low"] < lo:
             s = -1 if bar["high"] > hi else 1  # trade opposto allo sweep
-            limit = w.index[i] + max_wait if max_wait is not None else t1
-            for j in range(i, len(w)):
-                if w.index[j] > limit:
-                    break
-                if _inside(w.iloc[j]["close"], hi, lo):
-                    seg = w.iloc[i:j + 1]
+            t_sw = w.index[i]
+            limit = reclaim_until(t_sw) if reclaim_until else t1
+            seg_all = r.loc[t_sw:limit]
+            for j in range(len(seg_all)):
+                if _inside(seg_all.iloc[j]["close"], hi, lo):
+                    seg = seg_all.iloc[:j + 1]
                     extreme = seg["high"].max() if s == -1 else seg["low"].min()
-                    return s, float(w.iloc[j]["close"]), float(extreme), w.index[j] + FIVE
+                    return s, float(seg_all.iloc[j]["close"]), float(extreme), seg_all.index[j] + FIVE
             return None
     return None
 
 
 def h8a(b, D, asia):
     hi, lo = asia
+    if not _starts_inside(b, _ts(D, "01:59"), hi, lo):
+        return None
     r = _r5(b, D)
-    ev = _sweep_and_reclaim(r, hi, lo, _ts(D, "02:00"), _ts(D, "04:55"), max_wait=pd.Timedelta(minutes=25))
+    ev = _sweep_and_reclaim(r, hi, lo, _ts(D, "02:00"), _ts(D, "04:55"),
+                            reclaim_until=lambda t: t + pd.Timedelta(minutes=25))
     if ev is None:
         return None
     s, p, ext, start = ev
@@ -95,6 +111,8 @@ def h8a(b, D, asia):
 
 def h8b(b, D, asia):
     hi, lo = asia
+    if not _starts_inside(b, _ts(D, "02:59"), hi, lo):
+        return None
     mid = (hi + lo) / 2
     r = _r5(b, D).loc[_ts(D, "03:00"):_ts(D, "10:55")]
     for k in range(len(r)):
@@ -103,10 +121,12 @@ def h8b(b, D, asia):
             continue
         d = 1 if c > hi else -1
         nxt = r.iloc[k + 1:k + 4]
-        if len(nxt) < 3:
-            return None
+        if len(nxt) < 3 or nxt.index[-1] - r.index[k] != 3 * FIVE:
+            return None  # emendamento 2: 3 barre contigue
         for j in range(3):
             cj = nxt.iloc[j]["close"]
+            if (d == 1 and cj < lo) or (d == -1 and cj > hi):
+                return None  # emendamento 2: attraversa tutto il box -> nessun trade
             if _inside(cj, hi, lo):  # riassorbimento
                 seg = r.iloc[k:k + 2 + j]
                 ext = seg["high"].max() if d == 1 else seg["low"].min()
@@ -119,6 +139,8 @@ def h8b(b, D, asia):
 
 def h8c(b, D, london):
     hi, lo = london
+    if not _starts_inside(b, _ts(D, "09:29"), hi, lo):
+        return None
     r = _r5(b, D)
     ev = _sweep_and_reclaim(r, hi, lo, _ts(D, "09:30"), _ts(D, "10:55"))
     if ev is None:
@@ -131,32 +153,37 @@ def h8c(b, D, london):
 
 
 def h8d(b, D):
-    r = _r5(b, D).loc[_ts(D, "08:30"):_ts(D, "11:25")]
-    deadline = _ts(D, "11:29")
-    for i in range(len(r) - 2):
-        if r.index[i + 2] - r.index[i] != 2 * FIVE:
+    """Emendamento 2: FVG con barra 1 in 08:30-10:59; si usa quello INVALIDATO PER PRIMO nel tempo (parita': formato prima);
+    ingresso al primo tocco del bordo entro la barra delle 11:28; se non toccato, nessun trade."""
+    r = _r5(b, D)
+    deadline = _ts(D, "11:28")
+    cands = []
+    w = r.loc[_ts(D, "08:30"):_ts(D, "10:59")]
+    for i in range(len(w)):
+        t1 = w.index[i]
+        if t1 + 2 * FIVE not in r.index or t1 + FIVE not in r.index:
             continue
-        b1, b3 = r.iloc[i], r.iloc[i + 2]
+        b1, b3 = r.loc[t1], r.loc[t1 + 2 * FIVE]
         if b3["low"] > b1["high"]:
-            edge, far, side = float(b1["high"]), float(b3["low"]), -1  # FVG rialzista; invalidato -> short
+            edge, far, side = float(b1["high"]), float(b3["low"]), -1
         elif b3["high"] < b1["low"]:
             edge, far, side = float(b1["low"]), float(b3["high"]), 1
         else:
             continue
-        after = r.iloc[i + 3:]
+        after = r.loc[t1 + 3 * FIVE:deadline - FIVE]
         inv = after[after["close"] < edge] if side == -1 else after[after["close"] > edge]
         if inv.empty:
             continue
-        t_inv = inv.index[0] + FIVE
-        m = b.loc[t_inv:deadline]
-        touch = m["high"] >= edge if side == -1 else m["low"] <= edge
-        if not touch.any():
-            continue
-        risk = abs(far - edge)
-        if risk == 0:
-            continue
-        return _trade(side, edge, far, edge + side * 2 * risk, touch.idxmax(), _ts(D, "15:55"), entry_bar_stop=True)
-    return None
+        cands.append((inv.index[0] + FIVE, t1, edge, far, side))
+    if not cands:
+        return None
+    t_inv, _t1, edge, far, side = min(cands)
+    m = b.loc[t_inv:deadline]
+    touch = m["high"] >= edge if side == -1 else m["low"] <= edge
+    risk = abs(far - edge)
+    if not touch.any() or risk == 0:
+        return None
+    return _trade(side, edge, far, edge + side * 2 * risk, touch.idxmax(), _ts(D, "15:55"), entry_bar_stop=True)
 
 
 def h8e(b, D):
@@ -173,7 +200,7 @@ def h8e(b, D):
         prior = r.loc[:t - FIVE]
         opp = prior[(prior["close"] < prior["open"])] if d == 1 else prior[(prior["close"] > prior["open"])]
         if opp.empty:
-            continue
+            return None  # emendamento 2: solo il primo displacement
         ob = opp.iloc[-1]
         edge, far = (float(ob["high"]), float(ob["low"])) if d == 1 else (float(ob["low"]), float(ob["high"]))
         m = b.loc[t + FIVE:_ts(D, "11:59")]

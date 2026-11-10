@@ -70,3 +70,27 @@ Ogni trade va in `journal.sqlite` (strategia `T8_<ipotesi>`), con screenshot che
 - **H8d:** si usa il **primo FVG** (fra quelli formati dalle 08:30, su 3 barre a 5 minuti contigue) **che viene invalidato**. Ingresso al tocco del bordo dalle 11:29 in poi non ammesso; nella barra d'ingresso si controlla solo lo stop.
 - **H8e:** conta solo il **primo displacement** della finestra (servono 20 barre a 5 minuti precedenti per la media). Se l'order block non viene ritestato entro le 11:59, quel giorno non si opera.
 - **Tutte:** rischio nullo significa nessun trade.
+
+## Emendamento 2 — 2026-11-10, da code review, registrato PRIMA di qualsiasi dato 24 ore
+1. **H8d, scelta causale del FVG.** Si calcola il momento d'invalidazione di ogni FVG la cui barra 1 inizia fra le 08:30 e le 10:59 (killzone di NY). Si usa il FVG **invalidato per primo nel tempo**; a parità, quello formato prima. Ingresso al primo tocco del bordo entro la barra delle **11:28** compresa, cioè non dalle 11:29 in poi. Se il bordo non viene toccato, quel giorno **non si opera**: non si passa a un altro FVG.
+2. **Prezzo già fuori dal range all'inizio della finestra.** Lo sweep (H8a, H8c) e la rottura (H8b) valgono solo se il close della barra a 1 minuto **precedente l'apertura della finestra** sta dentro il range di riferimento:
+   - H8a: la barra delle 01:59, rispetto all'Asia range;
+   - H8b: la barra delle 02:59, rispetto al box Asia;
+   - H8c: la barra delle 09:29, rispetto al range di Londra.
+
+   Altrimenti quel giorno non si opera. Uno sweep, per definizione, parte da dentro il range.
+3. **H8a.** Il rientro si cerca fino a 25 minuti dopo l'inizio della barra dello sweep, anche oltre le 04:55. Lo sweep stesso deve iniziare entro le 04:55.
+4. **H8b.**
+   - L'accettazione richiede che le 3 barre successive chiudano tutte **oltre lo stesso lato** della rottura.
+   - Se una delle 3 barre chiude oltre il lato **opposto** del box (cioè attraversa tutto il box), quel giorno non si opera.
+   - Le 3 barre devono essere contigue, da 5 minuti l'una dopo l'altra; se non lo sono, quel giorno non si opera.
+5. **H8e.** Conta solo il primo displacement. Se non c'è un order block, cioè nessuna barra di colore opposto prima del displacement, quel giorno non si opera.
+6. **Costi.**
+   - Costo **decisionale**: NQ 0,45 punti, con stress 2× > 0. Deve inoltre restare > 0 con il costo MNQ di 0,85, come in T7.
+   - Il costo CFD di 2 punti si riporta a parte, non è decisionale.
+   - ES (SPX500) è solo riportato, con costo 0,5 punti, e la sua assenza nei dati non blocca il test.
+7. **Note dichiarate:**
+   - con il filtro HTF si scarta il primo segnale del giorno se va contro il trend, senza cercarne un altro allineato;
+   - a parità fra close e media il trend vale −1;
+   - l'inclusione di un giorno richiede la barra delle 15:59 e almeno 300 barre RTH, cioè una selezione sulla qualità dei dati, indipendente dai rendimenti;
+   - gli screenshot mostrano anche il box NY 09:30–15:59.

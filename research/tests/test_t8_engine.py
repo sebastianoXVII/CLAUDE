@@ -138,3 +138,84 @@ def test_simulate_abs_stop_first_and_time_exit():
     b = day(over={"10:00": (100, 103, 97, 100), "15:55": (100, 100, 100, 101)})
     assert E.simulate(b, ts("09:35"), 1, 100, 98, 102, ts("15:55"))["p_out"] == 98
     assert E.simulate(b, ts("10:01"), 1, 100, None, None, ts("15:55"))["p_out"] == 101
+
+
+# ---------- emendamento 2 (da code review) ----------
+
+def test_h8d_chooses_earliest_invalidation_not_first_formed():
+    # FVG1 (08:30-08:40, bordo 100.2) viene invalidato solo alle 10:30; FVG2 (bordo 101.6) e' invalidato alle 09:00
+    ov = {}
+    setv(ov, "08:30", "08:34", (100, 100.2, 99.9, 100.1))
+    setv(ov, "08:35", "08:39", (100.2, 100.9, 100.2, 100.8))
+    setv(ov, "08:40", "08:44", (100.8, 101.6, 100.6, 101.5))
+    setv(ov, "08:45", "08:49", (101.5, 101.6, 101.2, 101.4))
+    setv(ov, "08:50", "08:54", (101.4, 102.4, 101.4, 102.3))
+    setv(ov, "08:55", "08:59", (102.3, 102.5, 102.0, 102.4))
+    setv(ov, "09:00", "09:04", (102.4, 102.4, 101.3, 101.4))  # FVG2 invalidato (chiude sotto 101.6)
+    setv(ov, "09:05", "09:14", (101.4, 101.5, 101.3, 101.4))
+    ov["09:15"] = (101.4, 101.65, 101.4, 101.5)  # tocco del bordo di FVG2: in tempo reale qui si entra
+    setv(ov, "09:16", "10:29", (101.4, 101.5, 101.3, 101.4))
+    setv(ov, "10:30", "10:34", (101.4, 101.4, 99.9, 100.0))  # solo ora FVG1 e' invalidato
+    ov["10:40"] = (100.0, 100.25, 100.0, 100.1)
+    t = E.h8d(day(over=ov, base=100.0), D)
+    assert t["side"] == -1 and t["p_in"] == pytest.approx(101.6) and t["start"] == ts("09:15")
+
+
+def test_h8d_no_trade_when_earliest_invalidated_gap_is_not_retested():
+    ov = {}
+    setv(ov, "08:30", "08:34", (100, 100.2, 99.9, 100.1))
+    setv(ov, "08:35", "08:39", (100.2, 100.9, 100.2, 100.8))
+    setv(ov, "08:40", "08:44", (100.8, 101.0, 100.6, 100.9))
+    setv(ov, "08:45", "08:49", (100.9, 100.9, 99.0, 99.2))  # FVG1 invalidato per primo, mai ritestato
+    setv(ov, "08:50", "08:59", (99.0, 99.05, 98.95, 99.0))
+    setv(ov, "09:00", "09:04", (99.0, 99.1, 98.9, 99.0))
+    setv(ov, "09:05", "09:09", (99.0, 99.0, 98.3, 98.4))
+    setv(ov, "09:10", "09:14", (98.4, 98.5, 98.2, 98.3))  # FVG2 ribassista (bordo 98.9)
+    setv(ov, "09:15", "09:19", (98.3, 99.2, 98.3, 99.1))  # FVG2 invalidato dopo
+    setv(ov, "09:20", "09:29", (99.1, 99.2, 99.0, 99.1))
+    ov["09:30"] = (99.1, 99.1, 98.85, 98.9)  # FVG2 ritestato: NON deve essere usato
+    assert E.h8d(day(over=ov, base=99.0), D) is None
+
+
+def test_h8a_requires_price_inside_range_before_window():
+    ov = {"01:59": (101.5, 101.6, 101.4, 101.5)}  # alle 01:59 gia' sopra l'Asia high
+    setv(ov, "02:10", "02:14", (101, 102, 100.5, 101.5))
+    setv(ov, "02:15", "02:19", (101.5, 101.5, 100.2, 100.5))
+    assert E.h8a(day(over=ov), D, (101, 99)) is None
+
+
+def test_h8a_reclaim_can_happen_after_0455():
+    ov = {}
+    setv(ov, "04:50", "04:54", (101, 101.8, 100.8, 101.5))  # sweep alle 04:50
+    setv(ov, "04:55", "04:59", (101.5, 101.7, 101.2, 101.4))
+    setv(ov, "05:00", "05:04", (101.4, 101.4, 100.3, 100.5))  # rientro alle 05:00 (entro 25 min)
+    t = E.h8a(day(over=ov), D, (101, 99))
+    assert t is not None and t["side"] == -1 and t["start"] == ts("05:05")
+
+
+def test_h8b_close_through_whole_box_is_no_trade():
+    ov = {}
+    setv(ov, "03:00", "03:04", (100.5, 101.6, 100.5, 101.5))
+    setv(ov, "03:05", "03:19", (101.5, 101.5, 98.0, 98.5))  # chiude sotto il low del box
+    assert E.h8b(day(over=ov), D, (101, 99)) is None
+
+
+def test_h8b_requires_inside_before_0300_and_short_side():
+    pre = {"02:59": (98.5, 98.6, 98.4, 98.5)}
+    setv(pre, "03:00", "03:19", (98.5, 98.6, 98.0, 98.4))
+    assert E.h8b(day(over=pre), D, (101, 99)) is None  # gia' rotto prima delle 03:00
+    ov = {}
+    setv(ov, "03:00", "03:04", (99.5, 99.5, 98.4, 98.5))
+    setv(ov, "03:05", "03:19", (98.5, 98.6, 98.0, 98.2))
+    t = E.h8b(day(over=ov), D, (101, 99))
+    assert t["side"] == -1 and t["stop"] == pytest.approx(100) and t["target"] == pytest.approx(98.2 - 2 * 1.8)
+
+
+def test_h8c_requires_inside_at_0929():
+    ov = {}
+    setv(ov, "02:00", "08:29", (100, 102, 98, 100))
+    ov["09:29"] = (97.5, 97.6, 97.4, 97.5)  # gia' sotto il low di Londra
+    setv(ov, "09:40", "09:44", (99, 99, 97.5, 97.8))
+    setv(ov, "09:45", "09:49", (97.8, 98.6, 97.8, 98.5))
+    b = day(over=ov)
+    assert E.h8c(b, D, E.london_range(b, D)) is None

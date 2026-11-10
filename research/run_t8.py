@@ -19,7 +19,8 @@ from lab import charts, journal, pathstats  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 BARS, OUT = ROOT / "data" / "bars", ROOT / "research" / "results"
 CHARTS = ROOT / "data" / "charts" / "T8"
-INSTR = {"NQ": ("NAS100_USD", 20.0, 2.0), "ES": ("SPX500_USD", 50.0, 2.0)}  # file, $/pt pieno, costo CFD pt
+INSTR = {"NQ": ("NAS100_USD", 20.0, 0.45), "ES": ("SPX500_USD", 50.0, 0.5)}  # file, $/pt pieno, costo DECISIONALE pt (emend. 2)
+COST_MNQ, COST_CFD = 0.85, 2.0  # controllo MNQ (decisionale per NQ) e CFD (solo riportato)
 IS_END, HO_START = "2023-12-31", "2024-01-01"
 HYP = ("H8a", "H8b", "H8c", "H8d", "H8e")
 
@@ -78,7 +79,9 @@ def run(inst: str, period: str, keep=None, jr=None):
                                        png, title=f"T8 {h} {inst} {D.date()} {'LONG' if t['side'] == 1 else 'SHORT'} {r['reason']} {gross - cost:+.1f} pt",
                                        entry=(t["start"], t["p_in"]), stop=t["stop"], target=t["target"], exit=(r["t_out"], r["p_out"]),
                                        boxes=[("Asia", E._ts(D, "20:00", True), E._ts(D, "23:59", True), asia[1], asia[0]),
-                                              ("London", E._ts(D, "02:00"), E._ts(D, "08:29"), lon[1], lon[0])])
+                                              ("London", E._ts(D, "02:00"), E._ts(D, "08:29"), lon[1], lon[0]),
+                                              ("NY", E._ts(D, "09:30"), E._ts(D, "15:59"),
+                                               float(frame.loc[E._ts(D, "09:30"):, "low"].min()), float(frame.loc[E._ts(D, "09:30"):, "high"].max()))])
                     jr.add({"strategy": f"T8_{h}", "instrument": inst, "date": str(D.date()), "side": t["side"],
                             "entry_time": str(t["start"]), "entry": t["p_in"], "stop": t["stop"], "target": t["target"],
                             "exit_time": str(r["t_out"]), "exit": r["p_out"], "reason": r["reason"],
@@ -95,6 +98,8 @@ def stats(df, valid, usd, cost):
     m["n_trades"] = int(len(df))
     m["gross_pt_per_trade"] = float(df["gross_pts"].mean()) if len(df) else np.nan
     m["stress2x_media_pt"] = float((df["gross_pts"] - 2 * cost).groupby(df["date"]).sum().reindex(valid, fill_value=0.0).mean())
+    for name, c in (("media_pt_costo_MNQ", COST_MNQ), ("media_pt_costo_CFD", COST_CFD)):
+        m[name] = float((df["gross_pts"] - c).groupby(df["date"]).sum().reindex(valid, fill_value=0.0).mean()) if len(df) else np.nan
     m["uscite"] = df["reason"].value_counts(normalize=True).round(3).to_dict() if len(df) else {}
     yr = daily.groupby(daily.index.year).sum()
     m["anni_positivi"] = f"{int((yr > 0).sum())}/{len(yr)}"
@@ -112,6 +117,9 @@ def main():
             jr.clear_strategy(f"T8_{h}")
         res, pv = {}, {}
         for inst in INSTR:
+            if not (BARS / f"{INSTR[inst][0]}_M1_oanda.parquet").exists():
+                print(f"{inst}: dati assenti, saltato (solo riportato)")
+                continue
             df, valid = run(inst, "IS", jr=jr if inst == "NQ" else None)
             for h in HYP:
                 for v in ("base", "HTF"):
@@ -124,10 +132,11 @@ def main():
             m = res[key]
             pos, yrs = map(int, m["anni_positivi"].split("/"))
             m["p_holm"] = p
-            m["SOPRAVVIVE"] = bool(m["t_nw"] > 3 and p < 0.05 and m["stress2x_media_pt"] > 0 and pos * 3 >= 2 * yrs and m["n_trades"] >= 150)
+            m["SOPRAVVIVE"] = bool(m["t_nw"] > 3 and p < 0.05 and m["stress2x_media_pt"] > 0 and m["media_pt_costo_MNQ"] > 0
+                                   and pos * 3 >= 2 * yrs and m["n_trades"] >= 150)
         is_file.write_text(json.dumps(res, indent=2, default=str, ensure_ascii=False))
         cols = ["n_trades", "win_rate", "gross_pt_per_trade", "expectancy_pt_per_trade", "profit_factor", "sharpe_ann",
-                "max_dd_usd", "t_nw", "p_holm", "anni_positivi", "SOPRAVVIVE"]
+                "max_dd_usd", "t_nw", "p_holm", "stress2x_media_pt", "media_pt_costo_MNQ", "media_pt_costo_CFD", "anni_positivi", "SOPRAVVIVE"]
         print(pd.DataFrame(res).T.reindex(columns=cols).to_string(float_format=lambda v: f"{v:,.3f}"))
         surv = [k for k, m in res.items() if m.get("SOPRAVVIVE")]
         print("Sopravvissuti NQ:", surv or "NESSUNO -> T8 MORTO")
@@ -135,10 +144,13 @@ def main():
     surv = [k for k, m in json.loads(is_file.read_text()).items() if m.get("SOPRAVVIVE")]
     if not surv:
         sys.exit("T8 MORTO in-sample: hold-out non calcolato.")
+    import sqlite3
+    with sqlite3.connect(OUT / "journal.sqlite") as c:
+        c.execute("DELETE FROM trades WHERE strategy LIKE 'T8_%' AND sample = 'HO'")
     df, valid = run("NQ", "HO", keep=set(surv), jr=jr)
     res = {k: stats(df[df["key"] == k], valid, INSTR["NQ"][1], INSTR["NQ"][2]) for k in surv}
     for k, m in res.items():
-        m["SOPRAVVIVE_HO"] = bool(m["t_nw"] > 2 and m["stress2x_media_pt"] > 0)
+        m["SOPRAVVIVE_HO"] = bool(m["t_nw"] > 2 and m["stress2x_media_pt"] > 0 and m["media_pt_costo_MNQ"] > 0)
     (OUT / "T8_holdout.json").write_text(json.dumps(res, indent=2, default=str, ensure_ascii=False))
     print(pd.DataFrame(res).T.to_string())
 
