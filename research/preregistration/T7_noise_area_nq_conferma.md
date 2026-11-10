@@ -32,3 +32,12 @@ Sul periodo di test sopravvive solo se valgono TUTTE queste condizioni:
 
 ## 6. Diario
 Ogni trade va in `research/results/journal.sqlite` (strategia `T7_noise_area_nq`), con screenshot e MFE/MAE.
+
+## Emendamento 1 — 2026-11-10, cambio di fonte registrato PRIMA di qualsiasi dato
+**Motivo.** OANDA non concede l'accesso API al conto del committente, e FirstRate Data (NQ futures dal 2008) è a pagamento: per ora non si compra. Si usa **Dukascopy `USATECHIDXUSD`**, CFD sul Nasdaq-100, gratuito, scaricato tramite GitHub Actions.
+- **Dati:** candele BID a 1 minuto, 24 ore. Il periodo di test è **dal primo giorno disponibile al 2016-12-31**; la data d'inizio effettiva sarà riportata. Si usano i prezzi BID: lo spread è circa costante e sposta tutti i livelli allo stesso modo, quindi è dichiarato come approssimazione. Il volume è il tick volume Dukascopy, usato per il VWAP come approssimazione, come era già previsto per OANDA.
+- **Potenza statistica dichiarata prima.** Se i dati partono intorno al 2012, il campione è di circa 5 anni. Con uno Sharpe di 1,2 il t atteso è circa 2,7, sotto la soglia di 3. Per questo la regola decisionale passa da due a **tre esiti**:
+  - **CONFERMATO:** t > 3, più gli altri criteri della sezione 5;
+  - **INCONCLUSIVO:** 0 ≤ t ≤ 3. Non si dichiara né edge né morte. Serve il campione 2008–2011 dei futures veri (FirstRate), da acquistare solo in questo caso;
+  - **MORTO:** t < 0, cioè P&L netto medio negativo su un periodo mai visto.
+- **Resto invariato:** regole, costi e diagnostico di coerenza con QQQ sul periodo sovrapposto.

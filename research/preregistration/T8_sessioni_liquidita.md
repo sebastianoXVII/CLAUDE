@@ -94,3 +94,13 @@ Ogni trade va in `journal.sqlite` (strategia `T8_<ipotesi>`), con screenshot che
    - a parità fra close e media il trend vale −1;
    - l'inclusione di un giorno richiede la barra delle 15:59 e almeno 300 barre RTH, cioè una selezione sulla qualità dei dati, indipendente dai rendimenti;
    - gli screenshot mostrano anche il box NY 09:30–15:59.
+
+## Emendamento 3 — 2026-11-10, cambio di fonte registrato PRIMA di qualsiasi dato 24 ore
+- **Dati:** si usa Dukascopy `USATECHIDXUSD` (CFD sul Nasdaq-100, candele BID a 1 minuto, 24 ore, tick volume) al posto di OANDA `NAS100_USD`, dal primo giorno disponibile. ES (`USA500IDXUSD`) è solo riportato, se scaricato.
+- **Campioni:**
+  - In-sample: dall'inizio al 2023-12-31.
+  - Hold-out: dal 2024-01-01.
+  - Criteri invariati.
+- **Costi:**
+  - Costo decisionale invariato: NQ 0,45 punti, più il controllo con MNQ 0,85.
+  - Lo spread CFD Dukascopy è implicito nei prezzi BID, che stanno sotto il mid di circa mezzo spread. Su un round trip con ingresso e uscita al BID si compensa, ed è dichiarato come approssimazione.
