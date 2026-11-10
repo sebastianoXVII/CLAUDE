@@ -75,6 +75,8 @@ def main():
                     key = f"{inst}_{h}_{v}"
                     m = R8.stats(df[df["key"] == key] if len(df) else df, valid, usd, cost)
                     m["giorni"] = int(len(valid))
+                    for f in ("media_pt_costo_MNQ", "media_pt_costo_CFD"):  # campi NQ di T8, senza senso qui
+                        m.pop(f, None)
                     res[key], pv[key] = m, m["p_unilaterale"]
         for key, p in T1.holm(pv).items():
             res[key]["p_holm"] = p
@@ -92,6 +94,9 @@ def main():
     ho_file = OUT / "T13_holdout.json"
     if ho_file.exists():
         sys.exit("T13 hold-out gia' eseguito.")
+    import sqlite3
+    with sqlite3.connect(OUT / "journal.sqlite") as c:
+        c.execute("DELETE FROM trades WHERE strategy LIKE 'T13_%' AND sample = 'HO'")
     res = {}
     for inst in sorted({k.split("_")[0] for k in surv}):
         _s, usd, cost = INSTR[inst]
@@ -99,6 +104,8 @@ def main():
         df, valid = _run(inst, "HO", keep=keep, jr=_Renamer(jr0))
         for k in keep:
             m = R8.stats(df[df["key"] == k] if len(df) else df, valid, usd, cost)
+            for f in ("media_pt_costo_MNQ", "media_pt_costo_CFD"):
+                m.pop(f, None)
             m["ESITO_HO"] = survives_ho(m, len(valid))
             res[k] = m
     ho_file.write_text(json.dumps(res, indent=2, default=str, ensure_ascii=False))

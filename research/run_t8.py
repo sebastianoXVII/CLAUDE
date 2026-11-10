@@ -76,7 +76,7 @@ def run(inst: str, period: str, keep=None, jr=None):
                     png = CHARTS / period / f"{inst}_{h}_{D.date()}.png"
                     view = frame.loc[E._ts(D, "19:30", True):E._ts(D, "15:59")]
                     charts.trade_chart(view.resample("5min").agg({"open": "first", "high": "max", "low": "min", "close": "last"}).dropna(),
-                                       png, title=f"T8 {h} {inst} {D.date()} {'LONG' if t['side'] == 1 else 'SHORT'} {r['reason']} {gross - cost:+.1f} pt",
+                                       png, title=f"T8 {h} {inst} {D.date()} {'LONG' if t['side'] == 1 else 'SHORT'} {r['reason']} {gross - cost:+.5g} pt",
                                        entry=(t["start"], t["p_in"]), side=t["side"], stop=t["stop"], target=t["target"], exit=(r["t_out"], r["p_out"]),
                                        boxes=[("Asia", E._ts(D, "20:00", True), E._ts(D, "23:59", True), asia[1], asia[0]),
                                               ("London", E._ts(D, "02:00"), E._ts(D, "08:29"), lon[1], lon[0]),
@@ -113,6 +113,8 @@ def main():
     if "--holdout" not in sys.argv:
         if is_file.exists():
             sys.exit("T8 in-sample gia' eseguito.")
+        if not (BARS / f"{INSTR['NQ'][0]}_1m_24h.parquet").exists():
+            sys.exit("Dati NQ mancanti: T8 non eseguito (nessun verdetto scritto).")
         for h in HYP:
             jr.clear_strategy(f"T8_{h}")
         res, pv = {}, {}
