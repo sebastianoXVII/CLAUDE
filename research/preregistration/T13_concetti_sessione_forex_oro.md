@@ -48,3 +48,6 @@ Sono stime da verificare sul conto reale prima di qualsiasi uso.
 
 ## 7. Diario
 Tutti i trade in-sample vanno in `journal.sqlite` (strategia `T13_<strumento>_<ipotesi>`), con screenshot dei box Asia/Londra/NY.
+
+## Emendamento 1 — 2026-11-10, registrato PRIMA di qualsiasi esecuzione
+Il fuso orario dei dati è l'ora di New York con l'ora legale, non l'EST fisso: vedi T8, emendamento 5, per le prove sui soli prezzi.

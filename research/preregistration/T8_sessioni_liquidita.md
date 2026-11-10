@@ -116,3 +116,12 @@ Ogni trade va in `journal.sqlite` (strategia `T8_<ipotesi>`), con screenshot che
 
   L'hold-out è più corto del previsto (circa 1 anno). Lo si dichiara prima: se l'in-sample promuove qualcosa, l'hold-out 2025–26 arriverà dal forward test o da un'altra fonte.
 - **Prezzi:** sono quotazioni del broker che fornisce i dati a HistData, verosimilmente BID come per Dukascopy. Lo spread si compensa sul round trip, ed è dichiarato come approssimazione.
+
+## Emendamento 5 — 2026-11-10, fuso orario dei dati HistData, registrato PRIMA di qualsiasi esecuzione
+- **Cosa cambia:** l'emendamento 4 assumeva l'EST fisso (UTC−5, senza ora legale), come dice la documentazione HistData. I controlli sui soli prezzi, fatti prima di qualsiasi calcolo di P&L, mostrano che in questa copia dei dati gli orari sono quelli **di New York con l'ora legale**.
+- **Prove:**
+  1. La domenica il forex apre alle 17:00 nell'orario del file sia a gennaio sia a luglio.
+  2. A luglio, con l'ipotesi EST fisso, il picco di volatilità del Nasdaq cadrebbe alle 10:30 ET e quello di EURUSD alle 09:30 ET, cioè un'ora dopo l'apertura del cash (09:30) e dei dati macro (08:30).
+  3. Il prezzo NSXUSD alle 15:59 ET ha correlazione 1,000 con QQQ, contro lo 0,928 estivo con l'ipotesi EST fisso.
+- **Regola:** il timestamp del file si legge come ora di New York. Le barre nell'ora inesistente di marzo e in quella ripetuta di novembre si scartano: cadono fra l'01:00 e le 03:00 ET, fuori da tutte le finestre di T8 e T13.
+- Tutto il resto è invariato. Vale identico per T13.

@@ -20,19 +20,24 @@ def _zip(text: str) -> bytes:
     return b.getvalue()
 
 
-def test_parse_fixed_est_to_utc_without_dst():
+def test_parse_new_york_wall_clock_with_dst_to_utc():
     df = H.parse_zip(_zip(SAMPLE))
-    # EST fisso = UTC-5 tutto l'anno, anche d'estate (nessuna ora legale)
-    assert list(df.index) == [pd.Timestamp("2024-01-02 23:00", tz="UTC"), pd.Timestamp("2024-07-02 14:30", tz="UTC")]
+    # verificato sui dati (apertura forex domenica 17:00 tutto l'anno; 15:59 identico a QQQ): orario di New York CON ora legale
+    assert list(df.index) == [pd.Timestamp("2024-01-02 23:00", tz="UTC"), pd.Timestamp("2024-07-02 13:30", tz="UTC")]
     assert list(df.columns) == ["open", "high", "low", "close", "volume"]
     assert df.iloc[0]["low"] == 16818.25 and df.iloc[1]["close"] == 20002.0
 
 
-def test_summer_bar_maps_to_1030_new_york():
+def test_summer_bar_stays_0930_new_york():
     df = H.parse_zip(_zip(SAMPLE))
     ny = df.index.tz_convert("America/New_York")
-    assert ny[1].strftime("%H:%M") == "10:30"  # 09:30 EST fisso = 10:30 EDT
-    assert ny[0].strftime("%H:%M") == "18:00"  # d'inverno coincide
+    assert ny[1].strftime("%H:%M") == "09:30" and ny[0].strftime("%H:%M") == "18:00"
+
+
+def test_dst_gap_and_repeated_hour_bars_dropped():
+    txt = "20240310 023000;1;1;1;1;0\n20241103 013000;1;1;1;1;0\n20241103 030000;2;2;2;2;0\n"
+    df = H.parse_zip(_zip(txt))
+    assert list(df["close"]) == [2.0]  # 02:30 del 10/3 non esiste, 01:30 del 3/11 e' ambiguo: scartati
 
 
 def test_duplicates_dropped_and_sorted():
