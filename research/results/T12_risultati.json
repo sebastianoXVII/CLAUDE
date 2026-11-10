@@ -1,0 +1,215 @@
+{
+  "nota_unita": "valori in bp; i campi *_usd* e win_rate/expectancy di T1.metrics sono per GIORNO con trade, in bp",
+  "risultati": {
+    "info_2017_2024|GLD": {
+      "giorni": 1977,
+      "trade": 1135,
+      "win_rate": 0.3744493392070485,
+      "payoff": 1.5390368459333053,
+      "expectancy_pt_per_trade": -1.020113726791231,
+      "expectancy_usd_per_trade": -1.020113726791231,
+      "profit_factor": 0.9212544500304997,
+      "sharpe_ann": -0.34331098498585394,
+      "sortino_ann": -0.5571771428461503,
+      "max_dd_usd": -2101.6274767067766,
+      "pnl_tot_usd": -1157.8290799080467,
+      "t_nw": -0.9816972472168091,
+      "p_unilaterale": 0.8368754890095269,
+      "n_trades": 1680,
+      "netto_bp_per_trade": -0.6891839761357411,
+      "stress2x_media_bp": -1.4354218917086732,
+      "bp_per_anno": {
+        "2017": -1022.0,
+        "2018": -98.0,
+        "2019": 183.0,
+        "2020": -520.0,
+        "2021": -482.0,
+        "2022": 567.0,
+        "2023": 372.0,
+        "2024": -158.0
+      }
+    },
+    "OOS_2025|GLD": {
+      "giorni": 459,
+      "trade": 257,
+      "win_rate": 0.3852140077821012,
+      "payoff": 1.7047443226494368,
+      "expectancy_pt_per_trade": 1.3406781022946426,
+      "expectancy_usd_per_trade": 1.3406781022946426,
+      "profit_factor": 1.0681625819132547,
+      "sharpe_ann": 0.257501881211686,
+      "sortino_ann": 0.38063086313316846,
+      "max_dd_usd": -624.0576726765937,
+      "pnl_tot_usd": 344.55427228972326,
+      "t_nw": 0.3838597745059837,
+      "p_unilaterale": 0.35054119091982794,
+      "n_trades": 376,
+      "netto_bp_per_trade": 0.9163677454513921,
+      "stress2x_media_bp": -0.06850921069777105,
+      "bp_per_anno": {
+        "2025": 349.0,
+        "2026": -5.0
+      },
+      "p_holm": 1.0,
+      "CONFERMA": false
+    },
+    "info_2017_2024|IWM": {
+      "giorni": 1977,
+      "trade": 1263,
+      "win_rate": 0.38638163103721296,
+      "payoff": 1.3236647317413133,
+      "expectancy_pt_per_trade": -4.433267212288405,
+      "expectancy_usd_per_trade": -4.433267212288405,
+      "profit_factor": 0.8334817923738851,
+      "sharpe_ann": -0.7987480402124547,
+      "sortino_ann": -1.1398088857299713,
+      "max_dd_usd": -7633.223757907495,
+      "pnl_tot_usd": -5599.216489120255,
+      "t_nw": -2.1184639977965616,
+      "p_unilaterale": 0.9829321045785689,
+      "n_trades": 1924,
+      "netto_bp_per_trade": -2.910195680415934,
+      "stress2x_media_bp": -4.389285022316771,
+      "bp_per_anno": {
+        "2017": -211.0,
+        "2018": 1394.0,
+        "2019": 122.0,
+        "2020": -4466.0,
+        "2021": -110.0,
+        "2022": -1006.0,
+        "2023": -56.0,
+        "2024": -1266.0
+      }
+    },
+    "OOS_2025|IWM": {
+      "giorni": 459,
+      "trade": 277,
+      "win_rate": 0.36823104693140796,
+      "payoff": 1.422480267169769,
+      "expectancy_pt_per_trade": -4.503228333260302,
+      "expectancy_usd_per_trade": -4.503228333260302,
+      "profit_factor": 0.8291027842932368,
+      "sharpe_ann": -0.8185948743212864,
+      "sortino_ann": -1.2499210008344313,
+      "max_dd_usd": -1823.1982500562237,
+      "pnl_tot_usd": -1247.3942483131036,
+      "t_nw": -1.1828690647349798,
+      "p_unilaterale": 0.8815694782164867,
+      "n_trades": 417,
+      "netto_bp_per_trade": -2.991353113460682,
+      "stress2x_media_bp": -4.171229299157089,
+      "bp_per_anno": {
+        "2025": -679.0,
+        "2026": -568.0
+      },
+      "p_holm": 1.0,
+      "CONFERMA": false
+    },
+    "info_2017_2024|DIA": {
+      "giorni": 1977,
+      "trade": 1190,
+      "win_rate": 0.4,
+      "payoff": 1.4689570435378716,
+      "expectancy_pt_per_trade": -0.3622346220328268,
+      "expectancy_usd_per_trade": -0.3622346220328268,
+      "profit_factor": 0.9793046956919146,
+      "sharpe_ann": -0.08097873833504138,
+      "sortino_ann": -0.1273516688065935,
+      "max_dd_usd": -1795.9230813890808,
+      "pnl_tot_usd": -431.05920021906394,
+      "t_nw": -0.25020240304079633,
+      "p_unilaterale": 0.598784586504964,
+      "n_trades": 1763,
+      "netto_bp_per_trade": -0.24450323324961065,
+      "stress2x_media_bp": -0.9314411736060018,
+      "bp_per_anno": {
+        "2017": -12.0,
+        "2018": 476.0,
+        "2019": -64.0,
+        "2020": -645.0,
+        "2021": 87.0,
+        "2022": -42.0,
+        "2023": -21.0,
+        "2024": -210.0
+      }
+    },
+    "OOS_2025|DIA": {
+      "giorni": 459,
+      "trade": 271,
+      "win_rate": 0.3948339483394834,
+      "payoff": 1.5157450115243598,
+      "expectancy_pt_per_trade": -0.17553475158742674,
+      "expectancy_usd_per_trade": -0.17553475158742674,
+      "profit_factor": 0.9889311965433323,
+      "sharpe_ann": -0.04651412097711371,
+      "sortino_ann": -0.08179299932754616,
+      "max_dd_usd": -987.1008768525915,
+      "pnl_tot_usd": -47.569917680192646,
+      "t_nw": -0.06150964703125935,
+      "p_unilaterale": 0.5245233341322321,
+      "n_trades": 407,
+      "netto_bp_per_trade": -0.11687940461963829,
+      "stress2x_media_bp": -0.8130063566017275,
+      "bp_per_anno": {
+        "2025": -51.0,
+        "2026": 4.0
+      },
+      "p_holm": 1.0,
+      "CONFERMA": false
+    }
+  },
+  "correlazioni_PnL_strategia_giornaliero": {
+    "info_2017_2024": {
+      "QQQ": {
+        "QQQ": 1.0,
+        "GLD": 0.03,
+        "IWM": 0.41,
+        "DIA": 0.48
+      },
+      "GLD": {
+        "QQQ": 0.03,
+        "GLD": 1.0,
+        "IWM": 0.09,
+        "DIA": 0.04
+      },
+      "IWM": {
+        "QQQ": 0.41,
+        "GLD": 0.09,
+        "IWM": 1.0,
+        "DIA": 0.44
+      },
+      "DIA": {
+        "QQQ": 0.48,
+        "GLD": 0.04,
+        "IWM": 0.44,
+        "DIA": 1.0
+      }
+    },
+    "OOS_2025": {
+      "QQQ": {
+        "QQQ": 1.0,
+        "GLD": -0.04,
+        "IWM": 0.37,
+        "DIA": 0.46
+      },
+      "GLD": {
+        "QQQ": -0.04,
+        "GLD": 1.0,
+        "IWM": -0.0,
+        "DIA": 0.07
+      },
+      "IWM": {
+        "QQQ": 0.37,
+        "GLD": -0.0,
+        "IWM": 1.0,
+        "DIA": 0.42
+      },
+      "DIA": {
+        "QQQ": 0.46,
+        "GLD": 0.07,
+        "IWM": 0.42,
+        "DIA": 1.0
+      }
+    }
+  }
+}
