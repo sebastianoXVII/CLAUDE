@@ -27,11 +27,13 @@ def daily_last_close(sym_file: str) -> pd.Series:
     return b.groupby(pd.to_datetime(b.index.date))["close"].last()
 
 
-def build(sym: str):
+def build(sym: str, volume_fn=None):
     div = E.dividends_from_closes(daily_last_close(f"{sym}_1m.parquet"), daily_last_close(f"{sym}_1m_raw.parquet"))
     raw = pd.read_parquet(BARS / f"{sym}_1m_raw.parquet")
     raw.index = raw.index.tz_convert(E.TZ)
     rth = raw.between_time("09:30", "15:59")
+    if volume_fn is not None:  # T7 emendamento 2: VWAP da profilo di volume
+        rth = volume_fn(rth)
     days, rows, prev_ok = {}, [], False
     for d, g in rth.groupby(rth.index.date):
         ts = pd.Timestamp(d)
@@ -52,8 +54,8 @@ def build(sym: str):
     return tab, sig, days
 
 
-def trades_for(sym: str, k: float, cost: float):
-    tab, sig, days = build(sym)
+def trades_for(sym: str, k: float, cost: float, volume_fn=None):
+    tab, sig, days = build(sym, volume_fn)
     out, armed = [], []
     for ts, row in tab.iterrows():
         if np.isnan(row["prev_close"]) or sig.loc[ts].isna().any() or np.isnan(row["open"]):
