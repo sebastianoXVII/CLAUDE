@@ -14,14 +14,20 @@ import t1_engine as T1  # noqa: E402
 
 OUT = R6.OUT / "T12_risultati.json"
 INSTR = {"GLD": 1.0, "IWM": 1.6, "DIA": 0.8}  # costo base in bp
+COST_QQQ_BP = 0.25  # solo per la correlazione: 0,45 pt NQ su circa 18.000 pt
 PERIODS = {"info_2017_2024": ("2017-01-01", "2024-12-31"), "OOS_2025": ("2025-01-02", "2026-12-31")}
+
+
+def to_returns(tr: pd.DataFrame, cost_bp: float) -> pd.DataFrame:
+    tr = tr.copy()
+    tr["gross_ret"] = tr["side"] * (tr["exit"] / tr["entry"] - 1)
+    tr["net_ret"] = tr["gross_ret"] - cost_bp / 1e4
+    return tr
 
 
 def daily_returns(sym: str, cost_bp: float):
     tr, armed, _d, _n = R6.trades_for(sym, 1.0, 0.0)
-    tr["gross_ret"] = tr["side"] * (tr["exit"] / tr["entry"] - 1)
-    tr["net_ret"] = tr["gross_ret"] - cost_bp / 1e4
-    return tr, armed
+    return to_returns(tr, cost_bp), armed
 
 
 def evaluate(tr, armed, s, e, cost_bp):
@@ -41,7 +47,7 @@ def main():
     if OUT.exists():
         sys.exit("T12 gia' eseguito.")
     res, pv, dailies = {}, {}, {}
-    qtr, qarmed = daily_returns("QQQ", 0.4)
+    qtr, qarmed = daily_returns("QQQ", COST_QQQ_BP)
     for sym, c in INSTR.items():
         tr, armed = daily_returns(sym, c)
         for per, (s, e) in PERIODS.items():
@@ -50,7 +56,7 @@ def main():
             dailies[(per, sym)] = d
         pv[sym] = res[f"OOS_2025|{sym}"]["p_unilaterale"]
     for per, (s, e) in PERIODS.items():
-        _, dq = evaluate(qtr, qarmed, s, e, 0.4)
+        _, dq = evaluate(qtr, qarmed, s, e, COST_QQQ_BP)
         dailies[(per, "QQQ")] = dq
     for sym, p in T1.holm(pv).items():
         m = res[f"OOS_2025|{sym}"]
