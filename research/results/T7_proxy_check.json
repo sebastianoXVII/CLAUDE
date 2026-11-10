@@ -1,0 +1,26 @@
+{
+  "periodo": "2017-01-03 -> 2024-12-31",
+  "n_giorni": 1978,
+  "accordo_giorni": 0.9646107178968655,
+  "corr_pnl_giornaliero": 0.9895865082159783,
+  "accordo_solo_giorni_con_trade": 0.9402220324508966,
+  "n_giorni_con_trade": 1171,
+  "n_trade_vero": 1694,
+  "n_trade_proxy": 1683,
+  "soglie": {
+    "accordo_giorni": 0.9,
+    "corr_pnl_giornaliero": 0.9
+  },
+  "hash_profilo": "2836e82b754123ea",
+  "PROXY_VALIDO": true,
+  "diagnostico_fuori_tempo_profilo_2021_2024_su_2017_2019": {
+    "periodo": "2017-01-03 -> 2019-12-31",
+    "n_giorni": 738,
+    "accordo_giorni": 0.9566395663956639,
+    "corr_pnl_giornaliero": 0.9952449460077816,
+    "accordo_solo_giorni_con_trade": 0.9238095238095239,
+    "n_giorni_con_trade": 420,
+    "n_trade_vero": 615,
+    "n_trade_proxy": 613
+  }
+}
