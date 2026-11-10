@@ -81,3 +81,17 @@ N giorni, N trade, win rate, payoff, expectancy in punti e in $ (ES e MES), prof
 **Conversione dei costi.** I costi restano in punti indice (sezione 4). Il P&L in punti indice equivalenti è `last_pts = (P16:00 − P15:30) × k`, con k = 10 per SPY (SPX ≈ 10 × SPY) e k = 41 per QQQ (NDX ≈ 41 × QQQ, rapporto stabile in un intervallo 40–42 dal 2016). L'errore sul peso dei costi è inferiore al 5%; vale come limite dichiarato.
 
 **Vantaggio della modifica.** È un dato di borsa con volume reale, ed è lo stesso strumento (SPY) del paper originale di Gao et al. (2018).
+
+## Emendamento 2 — 2026-11-10, registrato PRIMA di qualsiasi risultato
+
+Deriva da una code review indipendente del motore. I rilievi sono stati verificati sui dati prima di accettarli. T1 non è ancora stato eseguito.
+
+1. **Mezze sessioni.** È verificato che Alpaca SIP include barre after-hours anche nei giorni di chiusura anticipata: il 2017-11-24 ha 164 barre dopo le 13:00, fino alle 16:59. Per questo si usano **solo barre della sessione regolare**, con inizio in [09:30, 15:59] ET. Nei giorni di chiusura anticipata mancano così i prezzi delle 15:00/15:30/16:00, e quei giorni restano esclusi come previsto dalla sezione 2.
+2. **Convenzione di prezzo, resa esplicita.** P(t) = close della barra che inizia a t−1 minuto. Se manca, si usa l'ultima barra precedente entro 2 minuti; la tolleranza guarda solo indietro. Questa è la lettura corretta di "ultima barra con timestamp ≤ t" per barre marcate all'inizio del minuto.
+3. **Benchmark del criterio 5.** "Stessi giorni" significa i giorni in cui la variante opera. La differenza è la media, sui soli giorni operati, di (segnale − 1) × last_pts; i costi si annullano. Il criterio è soddisfatto se questa media è > 0. È la lettura più severa: esclude che una variante filtrata passi solo perché evita i costi nei giorni senza trade.
+4. **Conversione in punti.** È verificato che `adjustment=all` sconta i dividendi in modo moltiplicativo: il 2017-01-03 SPY rettificato vale 194,30 contro 225,19 non rettificato (fattore 0,863); per QQQ il fattore è 0,931. Da qui in avanti:
+   - r1 e r12 si calcolano sui prezzi **rettificati**, perché eliminano il gap ex-dividendo, che sui futures non esiste;
+   - last_pts = (P_raw[16:00] − P_raw[15:30]) × k, sui prezzi **non rettificati** (`adjustment=raw`), con k = 10 / 41 come nell'emendamento 1.
+5. **Hold-out vincolato.** L'hold-out si calcola solo leggendo il verdetto in-sample salvato, e solo per le varianti sopravvissute. Il verdetto finale è 6a E 6b. Se nessuna variante sopravvive, l'esito è "T1 MORTO" e l'hold-out non si calcola.
+
+Rilievo respinto dopo verifica: la "perdita del 31 dicembre". Il 31/12 è presente in tutti gli anni (682–786 barre), perché Alpaca include la data di fine.
