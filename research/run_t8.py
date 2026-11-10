@@ -23,6 +23,7 @@ INSTR = {"NQ": ("NSXUSD", 20.0, 0.45), "ES": ("SPXUSD", 50.0, 0.5)}  # emendamen
 COST_MNQ, COST_CFD = 0.85, 2.0  # controllo MNQ (decisionale per NQ) e CFD (solo riportato)
 IS_END, HO_START = "2023-12-31", "2024-01-01"
 HYP = ("H8a", "H8b", "H8c", "H8d", "H8e")
+NO_JOURNAL = bool(__import__("os").environ.get("NO_JOURNAL"))  # verdetto prima, diario e screenshot in un secondo passaggio
 
 
 def days_of(sym: str):
@@ -122,7 +123,7 @@ def main():
             if not (BARS / f"{INSTR[inst][0]}_1m_24h.parquet").exists():
                 print(f"{inst}: dati assenti, saltato (solo riportato)")
                 continue
-            df, valid = run(inst, "IS", jr=jr if inst == "NQ" else None)
+            df, valid = run(inst, "IS", jr=jr if (inst == "NQ" and not NO_JOURNAL) else None)
             for h in HYP:
                 for v in ("base", "HTF"):
                     key = f"{inst}_{h}_{v}"

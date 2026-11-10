@@ -69,7 +69,7 @@ def main():
                 jr0.clear_strategy(f"T13_{inst}_{h}")
         res, pv = {}, {}
         for inst, (_s, usd, cost) in INSTR.items():
-            df, valid = _run(inst, "IS", jr=_Renamer(jr0))
+            df, valid = _run(inst, "IS", jr=None if R8.NO_JOURNAL else _Renamer(jr0))
             for h in R8.HYP:
                 for v in ("base", "HTF"):
                     key = f"{inst}_{h}_{v}"
