@@ -1,0 +1,49 @@
+# Download dei dati 24h a 1 minuto di Dukascopy (CFD indici) eseguito dalle macchine di GitHub (IP diversi per ogni anno).
+# I file vanno nel branch separato `data-dukascopy`, uno per anno e simbolo.
+name: dukascopy-download
+on:
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: "Simbolo Dukascopy"
+        default: "USATECHIDXUSD"
+        required: true
+permissions:
+  contents: write
+jobs:
+  year:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 17
+      matrix:
+        year: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas==2.2.3 pyarrow==18.1.0
+      - name: Download anno ${{ matrix.year }}
+        env:
+          DUKA_PAUSE: "2"
+        run: |
+          END="${{ matrix.year }}-12-31"
+          if [ "${{ matrix.year }}" = "2026" ]; then END=$(date -u -d "yesterday" +%F); fi
+          python research/data/dukascopy.py "${{ inputs.symbol }}" "${{ matrix.year }}-01-01" "$END" "${{ inputs.symbol }}_${{ matrix.year }}.parquet"
+      - name: Pubblica nel branch data-dukascopy
+        run: |
+          F="data/bars/${{ inputs.symbol }}_${{ matrix.year }}.parquet"
+          [ -f "$F" ] || { echo "nessun file per ${{ matrix.year }}"; exit 0; }
+          cp "$F" /tmp/
+          git config user.name "dukascopy-bot"; git config user.email "dukascopy-bot@users.noreply.github.com"
+          for i in 1 2 3 4 5 6; do
+            git fetch origin data-dukascopy 2>/dev/null && git checkout -f -B data-dukascopy origin/data-dukascopy || git checkout -f --orphan data-dukascopy
+            git rm -rq --cached . 2>/dev/null || true
+            mkdir -p dukascopy && cp "/tmp/$(basename $F)" dukascopy/
+            git add dukascopy/ && git commit -qm "Dukascopy ${{ inputs.symbol }} ${{ matrix.year }}" || exit 0
+            git push origin data-dukascopy && exit 0
+            sleep $((RANDOM % 20 + 5))
+          done
+          exit 1
