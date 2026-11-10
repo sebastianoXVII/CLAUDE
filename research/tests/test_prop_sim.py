@@ -67,3 +67,28 @@ def test_daily_loss_limit_breach_fails_even_with_room_on_max_loss():
 
 def test_consistency_zero_disables_rule():
     assert P.run_challenge([(4000, 0)], STATIC)["outcome"] == "pass"
+
+
+# ---------- fase funded (FundedNext: statico 10%, giornaliero 5%, payout ogni 14 giorni, 80%) ----------
+
+FUNDED = P.FundedRules(start=100_000, mll=10_000, daily_loss=5_000, first_cycle=21, cycle=14, split=0.8)
+
+
+def test_funded_pays_profit_at_cycle_end_and_resets_balance():
+    days = [(500, 0)] * 21 + [(0, 0)] * 14
+    r = P.run_funded(days, FUNDED)
+    assert r["payouts"] == [pytest.approx(0.8 * 10_500)] and r["breached"] is False
+
+
+def test_funded_no_payout_if_cycle_not_in_profit():
+    r = P.run_funded([(-100, -100)] * 21, FUNDED)
+    assert r["payouts"] == [] and r["breached"] is False
+
+
+def test_funded_breach_on_static_floor():
+    r = P.run_funded([(-4000, -4000), (-4000, -4000), (-2100, -2100)], FUNDED)  # pavimento statico a 90.000
+    assert r["breached"] is True and r["days"] == 3
+
+
+def test_funded_breach_on_daily_loss():
+    assert P.run_funded([(-5100, -5100)], FUNDED)["breached"] is True

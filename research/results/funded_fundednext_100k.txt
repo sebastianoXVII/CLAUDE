@@ -1,0 +1,7 @@
+Fase funded FundedNext Stellar 100K (regole verificate 2026-11-10), orizzonte 12 mesi, 3.000 simulazioni, costo CFD 2 pt
+edge storico    |  6$/pt (= 3 MNQ): payout medio/anno $6,907 (mediano $6,170, 10°-90° pct $1,395-$13,118) | conto perso entro 12 mesi 2% | anno senza payout 3%
+edge storico    |  8$/pt (= 4 MNQ): payout medio/anno $9,149 (mediano $8,163, 10°-90° pct $1,727-$17,490) | conto perso entro 12 mesi 9% | anno senza payout 3%
+edge storico    | 12$/pt (= 6 MNQ): payout medio/anno $12,756 (mediano $11,189, 10°-90° pct $970-$25,774) | conto perso entro 12 mesi 36% | anno senza payout 7%
+edge dimezzato  |  6$/pt (= 3 MNQ): payout medio/anno $4,939 (mediano $3,934, 10°-90° pct $81-$10,703) | conto perso entro 12 mesi 6% | anno senza payout 9%
+edge dimezzato  |  8$/pt (= 4 MNQ): payout medio/anno $6,495 (mediano $5,149, 10°-90° pct $0-$14,243) | conto perso entro 12 mesi 20% | anno senza payout 10%
+edge dimezzato  | 12$/pt (= 6 MNQ): payout medio/anno $8,946 (mediano $6,795, 10°-90° pct $0-$20,604) | conto perso entro 12 mesi 53% | anno senza payout 14%
