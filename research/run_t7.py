@@ -1,5 +1,5 @@
 """Esegue T7: Noise Area su NQ (HistData NSXUSD, VWAP da profilo di volume QQQ) sul periodo mai usato inizio -> 2016-12-31.
-Spec: research/preregistration/T7_noise_area_nq_conferma.md (emendamento 2). Esecuzione unica (rifiuta di ripetere).
+Spec: research/preregistration/T7_noise_area_nq_conferma.md (emendamenti 2-3). Esecuzione unica (rifiuta di ripetere).
 Richiede research/results/T7_proxy_check.json con proxy valido (run_t7_proxy_check.py)."""
 from __future__ import annotations
 
@@ -103,12 +103,14 @@ def trades(cost: float, profile: pd.Series):
 
 def main():
     f = OUT / "T7_risultati.json"
-    if f.exists():
+    if f.exists() or (OUT / "T7_trades.parquet").exists():
         sys.exit("T7 gia' eseguito: non si riesegue.")
     if not FILE.exists():
         sys.exit(f"manca {FILE}: nessun verdetto scritto.")
+    if not PROXY_FILE.exists():
+        sys.exit("proxy VWAP non validato (emendamento 2): manca il file della validazione.")
     prof = qqq_profile()
-    if not PROXY_FILE.exists() or not proxy_ok(json.loads(PROXY_FILE.read_text()), profile_hash(prof)):
+    if not proxy_ok(json.loads(PROXY_FILE.read_text()), profile_hash(prof)):
         sys.exit("proxy VWAP non validato o profilo diverso (emendamenti 2-3): T7 non si esegue su HistData.")
     tr, armed, _days = trades(COST_NQ, prof)
     if tr.empty:
@@ -137,8 +139,8 @@ def main():
         m["diagnostico_corr_giornaliera_NSXUSD_vs_QQQ"] = float(np.corrcoef(a.loc[common], b.loc[common])[0, 1]) if len(common) > 30 else None
     except Exception as e:  # noqa: BLE001
         m["diagnostico_corr_giornaliera_NSXUSD_vs_QQQ"] = f"non calcolato: {e}"
-    sub.to_parquet(OUT / "T7_trades.parquet")
     f.write_text(json.dumps(m, indent=2, default=str, ensure_ascii=False))
+    sub.to_parquet(OUT / "T7_trades.parquet")
     print(json.dumps({k: m[k] for k in ("periodo", "n_giorni", "n_trades", "trade_win_rate", "net_usd_per_trade", "sharpe_ann",
                                         "max_dd_usd", "t_nw", "stress2x_media_pt", "media_pt_costo_MNQ", "pnl_pt_per_anno", "pnl_pt_per_anno_accorpati",
                                         "criteri", "SOPRAVVIVE", "ESITO", "diagnostico_corr_giornaliera_NSXUSD_vs_QQQ")}, indent=2, default=str))
