@@ -104,3 +104,15 @@ Ogni trade va in `journal.sqlite` (strategia `T8_<ipotesi>`), con screenshot che
 - **Costi:**
   - Costo decisionale invariato: NQ 0,45 punti, più il controllo con MNQ 0,85.
   - Lo spread CFD Dukascopy è implicito nei prezzi BID, che stanno sotto il mid di circa mezzo spread. Su un round trip con ingresso e uscita al BID si compensa, ed è dichiarato come approssimazione.
+
+## Emendamento 4 — 2026-11-10, cambio di fonte registrato PRIMA di qualsiasi dato 24 ore
+- **Motivo:** Dukascopy limita il download al punto di renderlo impraticabile (dopo oltre un'ora nessun anno completato). HistData invece blocca lo scaricamento automatico dal suo sito, che non si aggira.
+- **Fonte:** HistData `NSXUSD` (CFD sul Nasdaq-100, barre a 1 minuto, 24 ore). Si usa la copia pubblica che l'autore del progetto `philipperemy/FX-1-Minute-Data` ha messo su Google Drive, condivisa apposta per essere scaricata. ES è sostituito da `SPXUSD`, solo riportato.
+- **Fuso orario:** HistData usa l'EST fisso (UTC−5) **senza ora legale**, con il timestamp all'inizio della barra. Le barre si convertono in UTC e poi in America/New_York, per far restare valide le finestre ET di T8.
+- **Volume:** è assente o nullo, e T8 non lo usa. Il resto (regole, costi, criteri) è invariato.
+- **Campioni:**
+  - in-sample: dal primo giorno disponibile (atteso fine 2010) al 2023-12-31;
+  - hold-out: dal 2024-01-01 alla fine dei dati disponibili quando si esegue l'hold-out.
+
+  L'hold-out è più corto del previsto (circa 1 anno). Lo si dichiara prima: se l'in-sample promuove qualcosa, l'hold-out 2025–26 arriverà dal forward test o da un'altra fonte.
+- **Prezzi:** sono quotazioni del broker che fornisce i dati a HistData, verosimilmente BID come per Dukascopy. Lo spread si compensa sul round trip, ed è dichiarato come approssimazione.
