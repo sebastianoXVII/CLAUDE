@@ -56,7 +56,7 @@ Deriva da una code review indipendente e dalla lettura del **codice Python uffic
    - 0 altrimenti.
 
    Lo stop è quindi implicito: si chiude quando la condizione non è più vera. L'inversione avviene quando il segnale passa da +1 a −1 o viceversa. La regola di Emendamento 1 sul rientro dopo lo stop decade: con questa definizione non può più accadere di entrare oltre il proprio stop.
-2. **Dividendi (dal codice degli autori).** Nel giorno ex-dividendo il close precedente usato per le bande è close_raw(t−1) − dividendo. Il dividendo si ricava dai dati già scaricati: D = close_raw(t−1) × (1 − f(t)/f(t−1)), con f = close rettificato / close grezzo. Si considera solo se D > 0,001 × prezzo.
+2. **Dividendi (dal codice degli autori).** Nel giorno ex-dividendo il close precedente usato per le bande è close_raw(t−1) − dividendo. Il dividendo si ricava dai dati già scaricati: D = close_raw(t−1) × (1 − f(t−1)/f(t)) *[errata pre-risultato: nella prima stesura il rapporto era invertito]*, con f = close rettificato / close grezzo. Si considera solo se D > 0,001 × prezzo.
 3. **Regola decisionale, sequenza fissa.**
    - SPY, lo strumento del paper, si testa per primo: t > 1,65 (unilaterale al 5%) e media > 0 con stress 2×.
    - Solo se SPY passa si testa QQQ con lo stesso criterio.

@@ -27,9 +27,26 @@ def day_inputs(b: pd.DataFrame) -> dict:
 
 
 def sigma_table(prices: pd.DataFrame, opens: pd.Series) -> pd.DataFrame:
-    """prices: giorni x DECISION_TIMES. sigma(t, HH:MM) = media di |P/Open - 1| sui 14 giorni validi PRECEDENTI."""
+    """prices: giorni x DECISION_TIMES. sigma(t, HH:MM) = media di |P/Open - 1| sui 14 giorni COMPLETI precedenti
+    (emendamento 2: un giorno incompleto viene saltato, non azzera i 14 successivi)."""
     move = (prices.div(opens, axis=0) - 1).abs()
-    return move.shift(1).rolling(LOOKBACK, min_periods=LOOKBACK).mean()
+    complete = move.dropna()
+    sig_c = complete.rolling(LOOKBACK, min_periods=LOOKBACK).mean()
+    # per ogni giorno: media dei 14 completi STRETTAMENTE precedenti
+    pos = complete.index.searchsorted(move.index, side="left")  # numero di giorni completi prima di ciascun giorno
+    out = pd.DataFrame(np.nan, index=move.index, columns=move.columns)
+    for i, k in enumerate(pos):
+        if k >= LOOKBACK:
+            out.iloc[i] = sig_c.iloc[k - 1].values
+    return out
+
+
+def dividends_from_closes(adj_close: pd.Series, raw_close: pd.Series) -> pd.Series:
+    """Dividendo nel giorno ex: D = close_raw(t-1) x (1 - f(t-1)/f(t)), con f = rettificato/grezzo (emendamento 2)."""
+    f = adj_close / raw_close
+    d = raw_close.shift(1) * (1 - f.shift(1) / f)
+    d = d.where(d > 0.001 * raw_close.shift(1), 0.0)
+    return d.fillna(0.0)
 
 
 def bounds(open_: float, prev_close: float, sigma: float) -> tuple[float, float]:
@@ -37,40 +54,24 @@ def bounds(open_: float, prev_close: float, sigma: float) -> tuple[float, float]
 
 
 def simulate_day(prices: dict, vwap: dict, ub: dict, lb: dict, close: float) -> list[dict]:
-    """Decisioni solo a HH:00/HH:30. Prima si gestisce la posizione (inversione sulla banda opposta, poi trailing stop
-    max(UB, VWAP) / min(LB, VWAP)), poi l'eventuale ingresso se flat. Dopo uno stop non si rientra nello stesso istante."""
+    """Regola ufficiale degli autori (emendamento 2): a ogni HH:00/HH:30 la posizione DIVENTA il segnale:
+    +1 se P > UB e P > VWAP, -1 se P < LB e P < VWAP, 0 altrimenti. Chiusura di tutto alle 16:00."""
     trades, pos, cur = [], 0, None
-
-    def close_pos(t, p, reason):
-        cur.update(exit_time=t, exit=float(p), reason=reason)
-        trades.append(cur)
-
     for t in DECISION_TIMES:
         p, u, l, v = prices[t], ub[t], lb[t], vwap[t]
-        if any(np.isnan(x) for x in (p, u, l)):
+        if any(np.isnan(x) for x in (p, u, l, v)):
+            continue  # prezzo mancante: la posizione resta invariata
+        sig = 1 if (p > u and p > v) else -1 if (p < l and p < v) else 0
+        if sig == pos:
             continue
-        stopped = False
-        if pos == 1:
-            if p < l:
-                close_pos(t, p, "reversal")
-                pos, cur = -1, {"side": -1, "entry_time": t, "entry": float(p)}
-                continue
-            if p < max(u, v if not np.isnan(v) else u):
-                close_pos(t, p, "stop")
-                pos, cur, stopped = 0, None, True
-        elif pos == -1:
-            if p > u:
-                close_pos(t, p, "reversal")
-                pos, cur = 1, {"side": 1, "entry_time": t, "entry": float(p)}
-                continue
-            if p > min(l, v if not np.isnan(v) else l):
-                close_pos(t, p, "stop")
-                pos, cur, stopped = 0, None, True
-        if pos == 0 and not stopped:
-            if p > u:
-                pos, cur = 1, {"side": 1, "entry_time": t, "entry": float(p)}
-            elif p < l:
-                pos, cur = -1, {"side": -1, "entry_time": t, "entry": float(p)}
-    if pos != 0 and not np.isnan(close):
-        close_pos("16:00", close, "close")
+        if pos != 0:
+            cur.update(exit_time=t, exit=float(p), reason="reversal" if sig != 0 else "stop")
+            trades.append(cur)
+            cur = None
+        if sig != 0:
+            cur = {"side": sig, "entry_time": t, "entry": float(p)}
+        pos = sig
+    if pos != 0:
+        cur.update(exit_time="16:00", exit=float(close), reason="close")
+        trades.append(cur)
     return trades

@@ -86,3 +86,45 @@ def test_day_inputs_from_bars_vwap_excludes_decision_bar():
     assert d["vwap"]["10:00"] == pytest.approx(100.0)  # la barra delle 10:00 non e' ancora nota alle 10:00
     assert d["prices"]["10:00"] == pytest.approx(100.0)  # P(10:00) = close della barra 09:59
     assert d["vwap"]["10:30"] > 150  # dopo, entra
+
+
+# ---------- emendamento 2: regola ufficiale degli autori ----------
+
+def test_no_entry_above_band_but_below_vwap():
+    assert run(flat(102.0), flat(103.0), flat(101.0), flat(99.0)) == []  # sopra UB ma sotto VWAP: segnale 0
+
+
+def test_no_churn_between_band_and_vwap():
+    pr = [104.0] + [102.0] * 11  # long alle 10:00, poi il prezzo resta fra UB (101) e VWAP (103)
+    vw = [100.0] + [103.0] * 11
+    tr = run(pr, vw, flat(101.0), flat(99.0), close=102.0)
+    assert len(tr) == 1 and tr[0]["exit_time"] == "10:30" and tr[0]["reason"] == "stop"
+
+
+def test_short_side_stop_is_min_of_lb_and_vwap():
+    pr = [98.0, 97.0, 97.5] + [97.5] * 9
+    vw = [100.0, 100.0, 97.2] + [97.2] * 9  # alle 11:00 il prezzo sale sopra il VWAP (97.2) -> fine short
+    tr = run(pr, vw, flat(101.0), flat(99.0), close=90.0)
+    assert len(tr) == 1 and tr[0]["side"] == -1 and tr[0]["exit_time"] == "11:00"
+
+
+def test_sigma_skips_incomplete_days_without_poisoning_next_14():
+    n = 30
+    idx = pd.bdate_range("2024-01-02", periods=n)
+    opens = pd.Series(100.0, index=idx)
+    p = pd.DataFrame({t: 101.0 for t in DEC}, index=idx)
+    p.iloc[10, 3] = np.nan  # un giorno incompleto
+    sig = E.sigma_table(p, opens)
+    assert sig.iloc[20:].notna().all().all()  # i giorni dopo non restano senza sigma
+    assert sig.loc[idx[16], "10:00"] == pytest.approx(0.01)  # usa i 14 giorni completi precedenti
+
+
+def test_dividend_from_adjusted_vs_raw_closes():
+    idx = pd.bdate_range("2024-03-14", periods=3)
+    raw = pd.Series([500.0, 498.0, 499.0], index=idx)
+    # rettifica moltiplicativa: prima dello stacco i prezzi rettificati sono scalati di (1 - D/close_prec)
+    D = 1.6
+    f_before = 1 - D / 500.0
+    adj = pd.Series([500.0 * f_before, 498.0, 499.0], index=idx)
+    div = E.dividends_from_closes(adj, raw)
+    assert div.loc[idx[1]] == pytest.approx(D, rel=1e-6) and div.loc[idx[0]] == 0 and div.loc[idx[2]] == 0
