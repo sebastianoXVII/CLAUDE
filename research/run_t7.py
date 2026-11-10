@@ -16,7 +16,7 @@ import t6_engine as E  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 BARS, OUT = ROOT / "data" / "bars", ROOT / "research" / "results"
-FILE = BARS / "NAS100_USD_M1_oanda.parquet"
+FILE = BARS / "USATECHIDXUSD_1m_24h.parquet"  # emendamento 1: Dukascopy
 TEST_END = "2016-12-31"
 COST_NQ, COST_MNQ, USD_NQ = 0.45, 0.85, 20.0
 
@@ -70,6 +70,8 @@ def main():
     m["criteri"] = {"t>3": m["t_nw"] > 3, "stress2x>0": m["stress2x_media_pt"] > 0, "MNQ>0": m["media_pt_costo_MNQ"] > 0,
                     "anni>=2/3": pos * 3 >= 2 * len(yrs)}
     m["SOPRAVVIVE"] = all(m["criteri"].values())
+    # emendamento 1: tre esiti
+    m["ESITO"] = "CONFERMATO" if m["SOPRAVVIVE"] else ("MORTO" if m["t_nw"] < 0 else "INCONCLUSIVO")
     m["periodo"] = f"{test_days.min().date()} -> {test_days.max().date()}"
     # diagnostico non decisionale: coerenza col proxy QQQ sul periodo sovrapposto
     try:
@@ -83,7 +85,7 @@ def main():
     f.write_text(json.dumps(m, indent=2, default=str, ensure_ascii=False))
     print(json.dumps({k: m[k] for k in ("periodo", "n_trades", "trade_win_rate", "net_usd_per_trade", "sharpe_ann",
                                         "max_dd_usd", "t_nw", "stress2x_media_pt", "media_pt_costo_MNQ", "pnl_pt_per_anno",
-                                        "criteri", "SOPRAVVIVE", "diagnostico_corr_giornaliera_OANDA_vs_QQQ")}, indent=2, default=str))
+                                        "criteri", "SOPRAVVIVE", "ESITO", "diagnostico_corr_giornaliera_OANDA_vs_QQQ")}, indent=2, default=str))
 
 
 if __name__ == "__main__":

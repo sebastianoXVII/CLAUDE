@@ -19,14 +19,14 @@ from lab import charts, journal, pathstats  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 BARS, OUT = ROOT / "data" / "bars", ROOT / "research" / "results"
 CHARTS = ROOT / "data" / "charts" / "T8"
-INSTR = {"NQ": ("NAS100_USD", 20.0, 0.45), "ES": ("SPX500_USD", 50.0, 0.5)}  # file, $/pt pieno, costo DECISIONALE pt (emend. 2)
+INSTR = {"NQ": ("USATECHIDXUSD", 20.0, 0.45), "ES": ("USA500IDXUSD", 50.0, 0.5)}  # emendamento 3: Dukascopy  # file, $/pt pieno, costo DECISIONALE pt (emend. 2)
 COST_MNQ, COST_CFD = 0.85, 2.0  # controllo MNQ (decisionale per NQ) e CFD (solo riportato)
 IS_END, HO_START = "2023-12-31", "2024-01-01"
 HYP = ("H8a", "H8b", "H8c", "H8d", "H8e")
 
 
 def days_of(sym: str):
-    b = pd.read_parquet(BARS / f"{sym}_M1_oanda.parquet")
+    b = pd.read_parquet(BARS / f"{sym}_1m_24h.parquet")
     b.index = b.index.tz_convert(E.TZ)
     b = b[~b.index.duplicated()].sort_index()
     rth_close = b.between_time("15:59", "15:59")["close"]
@@ -117,7 +117,7 @@ def main():
             jr.clear_strategy(f"T8_{h}")
         res, pv = {}, {}
         for inst in INSTR:
-            if not (BARS / f"{INSTR[inst][0]}_M1_oanda.parquet").exists():
+            if not (BARS / f"{INSTR[inst][0]}_1m_24h.parquet").exists():
                 print(f"{inst}: dati assenti, saltato (solo riportato)")
                 continue
             df, valid = run(inst, "IS", jr=jr if inst == "NQ" else None)
