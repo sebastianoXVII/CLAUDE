@@ -16,7 +16,9 @@ class Rules:
     start: float = 50_000.0
     target: float = 3_000.0
     mll: float = 2_000.0
-    consistency: float = 0.55
+    consistency: float = 0.55   # 0 = nessuna regola di consistency
+    trailing: bool = True       # False = pavimento statico a start - mll
+    daily_loss: float = 0.0     # 0 = nessun limite giornaliero; altrimenti perdita intraday massima del giorno
 
 
 def run_challenge(days, rules: Rules) -> dict:
@@ -26,12 +28,16 @@ def run_challenge(days, rules: Rules) -> dict:
     for i, (pnl, intra_min) in enumerate(days, start=1):
         if bal + min(intra_min, 0.0) <= floor or bal + pnl <= floor:
             return {"outcome": "fail", "days": i}
+        if rules.daily_loss and min(intra_min, pnl, 0.0) <= -rules.daily_loss:
+            return {"outcome": "fail", "days": i}
         bal += pnl
         best = max(best, pnl)
-        if bal - rules.start >= max(rules.target, best / rules.consistency):
+        need = max(rules.target, best / rules.consistency) if rules.consistency else rules.target
+        if bal - rules.start >= need:
             return {"outcome": "pass", "days": i}
-        hwm = max(hwm, bal)
-        floor = min(hwm - rules.mll, rules.start)
+        if rules.trailing:
+            hwm = max(hwm, bal)
+            floor = min(hwm - rules.mll, rules.start)
     return {"outcome": "open", "days": len(days)}
 
 

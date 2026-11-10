@@ -49,3 +49,21 @@ def test_scaling_multiplies_pnl_and_intraday_min():
     pool = [(100.0, -50.0)]
     scaled = P.scale(pool, 3)
     assert scaled == [(300.0, -150.0)]
+
+
+# ---------- drawdown statico e limite giornaliero (prop CFD) ----------
+
+STATIC = P.Rules(start=50_000, target=4_000, mll=5_000, consistency=0.0, trailing=False, daily_loss=2_500)
+
+
+def test_static_floor_never_moves():
+    # dopo +3.000 il pavimento statico resta a 45.000: un crollo a 47.500 non viola
+    assert P.run_challenge([(3000, 0), (-2400, -2400)], STATIC)["outcome"] == "open"
+
+
+def test_daily_loss_limit_breach_fails_even_with_room_on_max_loss():
+    assert P.run_challenge([(0, -2600)], STATIC)["outcome"] == "fail"
+
+
+def test_consistency_zero_disables_rule():
+    assert P.run_challenge([(4000, 0)], STATIC)["outcome"] == "pass"
