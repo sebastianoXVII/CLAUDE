@@ -1,0 +1,174 @@
+{
+  "Topstep 50K (trailing 2K EOD, cons 55%)|edge storico|2 MNQ": {
+    "p_pass": 0.412,
+    "p_fail": 0.409,
+    "p_open": 0.179,
+    "median_days_pass": 64.0,
+    "median_days_fail": 49.0
+  },
+  "Topstep 50K (trailing 2K EOD, cons 55%)|edge storico|4 MNQ": {
+    "p_pass": 0.356,
+    "p_fail": 0.6323333333333333,
+    "p_open": 0.011666666666666667,
+    "median_days_pass": 31.0,
+    "median_days_fail": 19.0
+  },
+  "Topstep 50K (trailing 2K EOD, cons 55%)|edge storico|6 MNQ": {
+    "p_pass": 0.2946666666666667,
+    "p_fail": 0.7,
+    "p_open": 0.005333333333333333,
+    "median_days_pass": 22.0,
+    "median_days_fail": 12.0
+  },
+  "Topstep 50K (trailing 2K EOD, cons 55%)|edge storico|8 MNQ": {
+    "p_pass": 0.25966666666666666,
+    "p_fail": 0.7373333333333333,
+    "p_open": 0.003,
+    "median_days_pass": 18.0,
+    "median_days_fail": 9.0
+  },
+  "Topstep 50K (trailing 2K EOD, cons 55%)|edge dimezzato|2 MNQ": {
+    "p_pass": 0.259,
+    "p_fail": 0.5676666666666667,
+    "p_open": 0.17333333333333334,
+    "median_days_pass": 64.0,
+    "median_days_fail": 49.0
+  },
+  "Topstep 50K (trailing 2K EOD, cons 55%)|edge dimezzato|4 MNQ": {
+    "p_pass": 0.24366666666666667,
+    "p_fail": 0.745,
+    "p_open": 0.011333333333333334,
+    "median_days_pass": 30.0,
+    "median_days_fail": 19.0
+  },
+  "Topstep 50K (trailing 2K EOD, cons 55%)|edge dimezzato|6 MNQ": {
+    "p_pass": 0.206,
+    "p_fail": 0.789,
+    "p_open": 0.005,
+    "median_days_pass": 20.0,
+    "median_days_fail": 12.0
+  },
+  "Topstep 50K (trailing 2K EOD, cons 55%)|edge dimezzato|8 MNQ": {
+    "p_pass": 0.17933333333333334,
+    "p_fail": 0.818,
+    "p_open": 0.0026666666666666666,
+    "median_days_pass": 18.0,
+    "median_days_fail": 9.0
+  },
+  "FTMO Futures Pro 50K (trailing 3K EOD, DLL 1K, cons 40%)|edge storico|2 MNQ": {
+    "p_pass": 0.276,
+    "p_fail": 0.538,
+    "p_open": 0.186,
+    "median_days_pass": 66.0,
+    "median_days_fail": 42.0
+  },
+  "FTMO Futures Pro 50K (trailing 3K EOD, DLL 1K, cons 40%)|edge storico|4 MNQ": {
+    "p_pass": 0.15,
+    "p_fail": 0.848,
+    "p_open": 0.002,
+    "median_days_pass": 33.0,
+    "median_days_fail": 16.0
+  },
+  "FTMO Futures Pro 50K (trailing 3K EOD, DLL 1K, cons 40%)|edge storico|6 MNQ": {
+    "p_pass": 0.07433333333333333,
+    "p_fail": 0.9256666666666666,
+    "p_open": 0.0,
+    "median_days_pass": 20.0,
+    "median_days_fail": 9.0
+  },
+  "FTMO Futures Pro 50K (trailing 3K EOD, DLL 1K, cons 40%)|edge storico|8 MNQ": {
+    "p_pass": 0.042,
+    "p_fail": 0.958,
+    "p_open": 0.0,
+    "median_days_pass": 16.0,
+    "median_days_fail": 6.0
+  },
+  "FTMO Futures Pro 50K (trailing 3K EOD, DLL 1K, cons 40%)|edge dimezzato|2 MNQ": {
+    "p_pass": 0.16133333333333333,
+    "p_fail": 0.6256666666666667,
+    "p_open": 0.213,
+    "median_days_pass": 67.0,
+    "median_days_fail": 47.0
+  },
+  "FTMO Futures Pro 50K (trailing 3K EOD, DLL 1K, cons 40%)|edge dimezzato|4 MNQ": {
+    "p_pass": 0.09033333333333333,
+    "p_fail": 0.905,
+    "p_open": 0.004666666666666667,
+    "median_days_pass": 31.0,
+    "median_days_fail": 17.0
+  },
+  "FTMO Futures Pro 50K (trailing 3K EOD, DLL 1K, cons 40%)|edge dimezzato|6 MNQ": {
+    "p_pass": 0.04633333333333333,
+    "p_fail": 0.9533333333333334,
+    "p_open": 0.0003333333333333333,
+    "median_days_pass": 20.0,
+    "median_days_fail": 10.0
+  },
+  "FTMO Futures Pro 50K (trailing 3K EOD, DLL 1K, cons 40%)|edge dimezzato|8 MNQ": {
+    "p_pass": 0.026333333333333334,
+    "p_fail": 0.9736666666666667,
+    "p_open": 0.0,
+    "median_days_pass": 14.0,
+    "median_days_fail": 6.0
+  },
+  "FTMO 2-Step 100K CFD|edge storico|4$/pt": {
+    "p_pass": 0.088,
+    "median_days_pass": 312.0
+  },
+  "FTMO 2-Step 100K CFD|edge storico|8$/pt": {
+    "p_pass": 0.457,
+    "median_days_pass": 231.0
+  },
+  "FTMO 2-Step 100K CFD|edge storico|12$/pt": {
+    "p_pass": 0.5803333333333334,
+    "median_days_pass": 169.0
+  },
+  "FTMO 2-Step 100K CFD|edge storico|16$/pt": {
+    "p_pass": 0.42966666666666664,
+    "median_days_pass": 113.0
+  },
+  "FTMO 2-Step 100K CFD|edge storico|24$/pt": {
+    "p_pass": 0.26466666666666666,
+    "median_days_pass": 56.0
+  },
+  "FTMO 2-Step 100K CFD|edge dimezzato|4$/pt": {
+    "p_pass": 0.029333333333333333,
+    "median_days_pass": 304.5
+  },
+  "FTMO 2-Step 100K CFD|edge dimezzato|8$/pt": {
+    "p_pass": 0.23966666666666667,
+    "median_days_pass": 233.0
+  },
+  "FTMO 2-Step 100K CFD|edge dimezzato|12$/pt": {
+    "p_pass": 0.3546666666666667,
+    "median_days_pass": 168.0
+  },
+  "FTMO 2-Step 100K CFD|edge dimezzato|16$/pt": {
+    "p_pass": 0.2816666666666667,
+    "median_days_pass": 116.0
+  },
+  "FTMO 2-Step 100K CFD|edge dimezzato|24$/pt": {
+    "p_pass": 0.17666666666666667,
+    "median_days_pass": 56.5
+  },
+  "FTMO 2-Step 100K CFD|dimezzato + spread 2x|4$/pt": {
+    "p_pass": 0.022,
+    "median_days_pass": 304.0
+  },
+  "FTMO 2-Step 100K CFD|dimezzato + spread 2x|8$/pt": {
+    "p_pass": 0.18966666666666668,
+    "median_days_pass": 233.0
+  },
+  "FTMO 2-Step 100K CFD|dimezzato + spread 2x|12$/pt": {
+    "p_pass": 0.29233333333333333,
+    "median_days_pass": 169.0
+  },
+  "FTMO 2-Step 100K CFD|dimezzato + spread 2x|16$/pt": {
+    "p_pass": 0.22833333333333333,
+    "median_days_pass": 111.0
+  },
+  "FTMO 2-Step 100K CFD|dimezzato + spread 2x|24$/pt": {
+    "p_pass": 0.14233333333333334,
+    "median_days_pass": 54.0
+  }
+}
