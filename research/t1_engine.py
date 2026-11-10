@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import exchange_calendars as xc
 import statsmodels.api as sm
 from scipy import stats
 
@@ -11,6 +12,9 @@ TZ = "America/New_York"
 TOL = pd.Timedelta(minutes=2)
 ONE_MIN = pd.Timedelta(minutes=1)
 TIMES = ("10:00", "15:00", "15:30", "16:00")
+# Emendamento 2: chiusure anticipate NYSE dal calendario ufficiale (le barre after-hours le farebbero sembrare valide)
+_XNYS = xc.get_calendar("XNYS", start="2005-01-01", end="2030-12-31")
+EARLY_CLOSES = frozenset(pd.Timestamp(d).tz_localize(None).normalize() for d in _XNYS.early_closes)
 
 
 def price_at(day_bars: pd.DataFrame, t: pd.Timestamp) -> float:
@@ -22,24 +26,37 @@ def price_at(day_bars: pd.DataFrame, t: pd.Timestamp) -> float:
     return float(s.iloc[-1])
 
 
-def daily_points(bars: pd.DataFrame, window: int = 252, k: float = 1.0) -> pd.DataFrame:
-    """Da barre a 1 minuto (indice UTC) a una riga per giorno valido. 'thr' usa solo giorni precedenti;
-    resta NaN finche' la finestra non e' piena (le righe si scartano in fase di valutazione).
-    k converte il movimento dello strumento in punti indice equivalenti (emendamento 1: SPY k=10, QQQ k=41)."""
+def session_prices(bars: pd.DataFrame) -> pd.DataFrame:
+    """Prezzi alle ore chiave per giorno feriale, usando SOLO barre della sessione regolare (inizio in 09:30-15:59 ET),
+    esclusi i giorni di chiusura anticipata NYSE (emendamento 2)."""
     b = bars.copy()
     b.index = b.index.tz_convert(TZ)
+    assert b.index.is_monotonic_increasing, "barre non ordinate"
+    b = b.between_time("09:30", "15:59")
     rows = []
     for d, g in b.groupby(b.index.date):
-        if pd.Timestamp(d).weekday() >= 5:
+        if pd.Timestamp(d).weekday() >= 5 or pd.Timestamp(d) in EARLY_CLOSES:
             continue
-        p = {k: price_at(g, pd.Timestamp(f"{d} {k}", tz=TZ)) for k in TIMES}
-        rows.append({"date": pd.Timestamp(d), **{"p" + k.replace(":", ""): v for k, v in p.items()}})
-    df = pd.DataFrame(rows).set_index("date").dropna()
+        p = {"p" + hhmm.replace(":", ""): price_at(g, pd.Timestamp(f"{d} {hhmm}", tz=TZ)) for hhmm in TIMES}
+        rows.append({"date": pd.Timestamp(d), **p})
+    return pd.DataFrame(rows).set_index("date")
+
+
+def daily_points(bars: pd.DataFrame, window: int = 252, k: float = 1.0, raw: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Una riga per giorno valido. r1/r12 dai prezzi in `bars` (rettificati); last_pts in punti indice equivalenti
+    = (P16:00 - P15:30) * k, dai prezzi `raw` (non rettificati) se forniti (emendamenti 1 e 2).
+    'thr' usa solo giorni precedenti e resta NaN finche' la finestra non e' piena."""
+    df = session_prices(bars)
+    if raw is not None:
+        r = session_prices(raw)[["p1530", "p1600"]].rename(columns={"p1530": "raw1530", "p1600": "raw1600"})
+        df = df.join(r, how="inner")
+    df = df.dropna()
     df["prev_close"] = df["p1600"].shift(1)
     df = df.dropna(subset=["prev_close"])
     df["r1"] = np.log(df["p1000"] / df["prev_close"])
     df["r12"] = np.log(df["p1530"] / df["p1500"])
-    df["last_pts"] = (df["p1600"] - df["p1530"]) * k
+    hi, lo = ("raw1600", "raw1530") if raw is not None else ("p1600", "p1530")
+    df["last_pts"] = (df[hi] - df[lo]) * k
     df["thr"] = df["r1"].abs().shift(1).rolling(window, min_periods=window).quantile(2 / 3)
     return df
 
@@ -66,7 +83,8 @@ def nw_t(x, lags: int = 5) -> float:
 
 
 def holm(pvals: dict[str, float]) -> dict[str, float]:
-    items = sorted(pvals.items(), key=lambda kv: kv[1])
+    clean = {k: (1.0 if p is None or np.isnan(p) else p) for k, p in pvals.items()}
+    items = sorted(clean.items(), key=lambda kv: kv[1])
     m, adj, running = len(items), {}, 0.0
     for i, (k, p) in enumerate(items):
         running = max(running, min(1.0, (m - i) * p))
@@ -89,10 +107,10 @@ def metrics(pnl: pd.Series, traded: pd.Series, usd_per_pt: float) -> dict:
         "payoff": float(wins.mean() / -losses.mean()) if len(wins) and len(losses) else np.nan,
         "expectancy_pt_per_trade": float(tr.mean()) if len(tr) else np.nan,
         "expectancy_usd_per_trade": float(tr.mean() * usd_per_pt) if len(tr) else np.nan,
-        "profit_factor": float(wins.sum() / -losses.sum()) if len(losses) else np.nan,
+        "profit_factor": float(wins.sum() / -losses.sum()) if len(losses) else (float("inf") if len(wins) else np.nan),
         "sharpe_ann": float(usd.mean() / sd * np.sqrt(252)) if sd > 0 else np.nan,
         "sortino_ann": float(usd.mean() / np.sqrt((down**2).sum() / len(usd)) * np.sqrt(252)) if len(down) else np.nan,
-        "max_dd_usd": float((eq - eq.cummax()).min()),
+        "max_dd_usd": float((eq - np.maximum(eq.cummax(), 0.0)).min()),
         "pnl_tot_usd": float(usd.sum()),
         "t_nw": t,
         "p_unilaterale": float(1 - stats.norm.cdf(t)) if not np.isnan(t) else np.nan,
@@ -130,10 +148,17 @@ def evaluate(spec: dict, period: str) -> dict:
             m["pnl_pt_per_anno"] = {int(y): round(float(x), 2) for y, x in yearly.items()}
             m["anni_positivi"] = f"{int((yearly > 0).sum())}/{len(yearly)}"
             if v != "BENCH_long":
-                m["diff_vs_bench_pt_medio"] = float((pnl - base["BENCH_long"][0]).mean())
+                # emendamento 2: solo giorni operati; (segnale - 1) * last_pts, i costi si annullano
+                sig_minus_bench = pnl[traded] - base["BENCH_long"][0][traded]
+                m["diff_vs_bench_pt_medio"] = float(sig_minus_bench.mean()) if traded.any() else np.nan
                 pvals[key] = m["p_unilaterale"]
             res[key] = m
     for k, p in holm(pvals).items():
         res[k]["p_holm"] = p
         res[k]["criteri"], res[k]["SOPRAVVIVE"] = verdict(res[k], period)
     return res
+
+
+def holdout_candidates(in_sample: dict) -> list[str]:
+    """Emendamento 2: l'hold-out si calcola solo per le varianti sopravvissute in-sample."""
+    return [k for k, m in in_sample.items() if m.get("SOPRAVVIVE") is True]

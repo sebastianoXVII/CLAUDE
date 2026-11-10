@@ -50,3 +50,14 @@ def test_fetch_drops_duplicate_timestamps_and_sorts():
 
     df = A.fetch("SPY", "2016-01-04", "2016-01-05", get=fake_get)
     assert len(df) == 2 and df.index.is_monotonic_increasing
+
+
+def test_fetch_passes_requested_adjustment():
+    seen = {}
+
+    def fake_get(params):
+        seen.update(params)
+        return page("SPY", [B1], token=None)
+
+    A.fetch("SPY", "2016-01-04", "2016-01-05", get=fake_get, adjustment="raw")
+    assert seen["adjustment"] == "raw"

@@ -1,5 +1,5 @@
 """Test del motore T1 (pre-registrazione: research/preregistration/T1_momentum_ultima_mezzora.md).
-Scritti PRIMA dell'implementazione (TDD). Dati sintetici a 1 minuto in UTC, come quelli di Dukascopy."""
+Scritti PRIMA dell'implementazione (TDD). Dati sintetici a 1 minuto in UTC, come quelli di Alpaca."""
 import sys
 from pathlib import Path
 
@@ -187,3 +187,64 @@ def test_years_criterion_is_a_fraction_of_five_sevenths():
     ok = {"t_nw": 3.5, "media_pt_stress2x": 0.1, "p_holm": 0.01, "diff_vs_bench_pt_medio": 0.2}
     assert E.verdict({**ok, "anni_positivi": "3/3"}, "in_sample")[1] is True
     assert E.verdict({**ok, "anni_positivi": "2/3"}, "in_sample")[1] is False
+
+
+# ---------- emendamento 2 (da code review) ----------
+
+def test_half_day_with_after_hours_bars_is_still_excluded():
+    b = make_bars({
+        "2024-11-27": day(100, 100, 100, 100),
+        "2024-11-29": {"09:59": 50, "12:59": 50, "14:59": 53, "15:29": 53, "15:59": 53},  # after-hours dopo le 13:00
+        "2024-12-02": day(110, 110, 110, 110),
+    })
+    d = E.daily_points(b, window=1)
+    assert pd.Timestamp("2024-11-29") not in d.index
+    assert d.loc["2024-12-02", "r1"] == pytest.approx(np.log(110 / 100))
+
+
+def test_pre_market_bars_are_ignored():
+    b = make_bars({"2024-03-11": day(100, 100, 100, 100),
+                   "2024-03-12": {"09:15": 999.0, **day(101, 101, 101, 101)}})
+    d = E.daily_points(b, window=1)
+    assert d.loc["2024-03-12", "r1"] == pytest.approx(np.log(101 / 100))
+
+
+def test_last_pts_uses_raw_prices_when_given():
+    adj = make_bars({"2024-03-11": day(90, 90, 90, 90), "2024-03-12": day(90, 90, 90, 90.9)})
+    raw = make_bars({"2024-03-11": day(100, 100, 100, 100), "2024-03-12": day(100, 100, 100, 101)})
+    d = E.daily_points(adj, window=1, k=10.0, raw=raw)
+    assert d.loc["2024-03-12", "last_pts"] == pytest.approx(10.0)  # (101-100)*10, non (90.9-90)*10
+
+
+def test_benchmark_diff_only_on_traded_days():
+    d = synthetic_daily(n=600, seed=5)
+    d["last_pts"] = 1.0  # sempre su: il benchmark long vince sempre
+    res = E.evaluate({"A": (d, 50.0, 5.0, 0.33, 0.49)}, "in_sample")
+    # V2 opera solo nei giorni grandi; dove e' short perde 2 punti rispetto al long, dove e' long pareggia
+    traded = d["r1"].abs() > d["thr"]
+    sig = np.sign(d["r1"])[traded]
+    assert res["A_V2"]["diff_vs_bench_pt_medio"] == pytest.approx(((sig - 1) * 1.0).mean())
+    assert res["A_V2"]["diff_vs_bench_pt_medio"] < 0
+
+
+def test_holm_treats_nan_as_one_and_keeps_others_correct():
+    adj = E.holm({"a": 0.5, "b": float("nan"), "c": 0.01, "d": 0.03})
+    assert adj["c"] == pytest.approx(0.04)
+    assert adj["b"] == pytest.approx(1.0)
+
+
+def test_max_drawdown_counts_losses_from_start():
+    pnl = pd.Series([-1.0, -1.0, 2.0], index=pd.bdate_range("2020-01-01", periods=3))
+    m = E.metrics(pnl, pnl != 0, usd_per_pt=1.0)
+    assert m["max_dd_usd"] == pytest.approx(-2.0)
+
+
+def test_profit_factor_infinite_without_losses():
+    pnl = pd.Series([1.0, 2.0], index=pd.bdate_range("2020-01-01", periods=2))
+    assert E.metrics(pnl, pnl != 0, 1.0)["profit_factor"] == float("inf")
+
+
+def test_holdout_only_for_in_sample_survivors():
+    ins = {"A_V1": {"SOPRAVVIVE": True}, "A_V2": {"SOPRAVVIVE": False}}
+    assert E.holdout_candidates(ins) == ["A_V1"]
+    assert E.holdout_candidates({"A_V1": {"SOPRAVVIVE": False}}) == []
