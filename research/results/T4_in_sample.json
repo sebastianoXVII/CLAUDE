@@ -1,0 +1,332 @@
+{
+  "ES_C1_ORB": {
+    "giorni": 1746,
+    "trade": 1727,
+    "win_rate": 0.2015055008685582,
+    "payoff": 4.1261653638905695,
+    "expectancy_pt_per_trade": 0.1916149392009255,
+    "expectancy_usd_per_trade": 9.580746960046275,
+    "profit_factor": 1.0412658061159668,
+    "sharpe_ann": 0.18432823193331843,
+    "sortino_ann": 0.4549481263773164,
+    "max_dd_usd": -29348.350000000326,
+    "pnl_tot_usd": 16545.94999999989,
+    "t_nw": 0.5119447979704249,
+    "p_unilaterale": 0.3043448221267846,
+    "gross_pt_per_trade": 0.5216149392009249,
+    "gross_usd_per_trade": 26.08074696004625,
+    "stress2x_media_pt": -0.13687915234822512,
+    "uscite": {
+      "stop": 0.789,
+      "time": 0.211
+    },
+    "anni_positivi": "4/7",
+    "pnl_pt_per_anno": {
+      "2017": -63.0,
+      "2018": 74.5,
+      "2019": 130.1,
+      "2020": -434.5,
+      "2021": 250.5,
+      "2022": 457.8,
+      "2023": -84.4
+    },
+    "p_holm": 1.0,
+    "criteri": {
+      "t>3": false,
+      "holm<0.05": false,
+      "stress2x>0": false,
+      "anni>=5/7": false
+    },
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "ES_C2_gap": {
+    "giorni": 1746,
+    "trade": 1172,
+    "win_rate": 0.5631399317406144,
+    "payoff": 0.6829436459177184,
+    "expectancy_pt_per_trade": -0.6866441979522185,
+    "expectancy_usd_per_trade": -34.33220989761093,
+    "profit_factor": 0.8803570435658089,
+    "sharpe_ann": -0.6036662450846622,
+    "sortino_ann": -0.7536817861002304,
+    "max_dd_usd": -49114.399999999994,
+    "pnl_tot_usd": -40237.35000000002,
+    "t_nw": -1.6287503076529333,
+    "p_unilaterale": 0.9483170559215142,
+    "gross_pt_per_trade": -0.35664419795221913,
+    "gross_usd_per_trade": -17.832209897610955,
+    "stress2x_media_pt": -0.6824209621993127,
+    "uscite": {
+      "time": 0.604,
+      "target": 0.396
+    },
+    "anni_positivi": "2/7",
+    "pnl_pt_per_anno": {
+      "2017": -88.9,
+      "2018": -223.2,
+      "2019": -211.2,
+      "2020": 99.3,
+      "2021": -460.3,
+      "2022": -46.4,
+      "2023": 126.0
+    },
+    "p_holm": 1.0,
+    "criteri": {
+      "t>3": false,
+      "holm<0.05": false,
+      "stress2x>0": false,
+      "anni>=5/7": false
+    },
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "ES_C3_VWAP": {
+    "giorni": 1746,
+    "trade": 1152,
+    "win_rate": 0.6284722222222222,
+    "payoff": 0.5025269687210173,
+    "expectancy_pt_per_trade": -1.2076252212505612,
+    "expectancy_usd_per_trade": -60.381261062528054,
+    "profit_factor": 0.8500689844720013,
+    "sharpe_ann": -0.7571199238450859,
+    "sortino_ann": -0.8507928886714833,
+    "max_dd_usd": -81901.37866440057,
+    "pnl_tot_usd": -69559.21274403235,
+    "t_nw": -2.1143136481248144,
+    "p_unilaterale": 0.9827557562803207,
+    "gross_pt_per_trade": -0.877625221250562,
+    "gross_usd_per_trade": -43.8812610625281,
+    "stress2x_media_pt": -1.0145156098972772,
+    "uscite": {
+      "target": 0.547,
+      "time": 0.453
+    },
+    "anni_positivi": "2/7",
+    "pnl_pt_per_anno": {
+      "2017": 102.8,
+      "2018": -220.6,
+      "2019": 78.6,
+      "2020": -273.5,
+      "2021": -130.2,
+      "2022": -659.9,
+      "2023": -288.4
+    },
+    "p_holm": 1.0,
+    "criteri": {
+      "t>3": false,
+      "holm<0.05": false,
+      "stress2x>0": false,
+      "anni>=5/7": false
+    },
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "ES_C4_FVG": {
+    "giorni": 1746,
+    "trade": 1363,
+    "win_rate": 0.3418928833455613,
+    "payoff": 1.8238021003986682,
+    "expectancy_pt_per_trade": -0.19644167278064598,
+    "expectancy_usd_per_trade": -9.822083639032298,
+    "profit_factor": 0.9474824735627417,
+    "sharpe_ann": -0.27260539623419505,
+    "sortino_ann": -0.4683412356371377,
+    "max_dd_usd": -22113.45000000108,
+    "pnl_tot_usd": -13387.50000000104,
+    "t_nw": -0.7110659615316748,
+    "p_unilaterale": 0.7614783191438661,
+    "gross_pt_per_trade": 0.13355832721935368,
+    "gross_usd_per_trade": 6.677916360967684,
+    "stress2x_media_pt": -0.4109621993127266,
+    "uscite": {
+      "stop": 0.654,
+      "target": 0.324,
+      "time": 0.021
+    },
+    "anni_positivi": "2/7",
+    "pnl_pt_per_anno": {
+      "2017": -71.0,
+      "2018": 51.1,
+      "2019": -19.2,
+      "2020": -92.3,
+      "2021": 109.1,
+      "2022": -32.7,
+      "2023": -212.7
+    },
+    "p_holm": 1.0,
+    "criteri": {
+      "t>3": false,
+      "holm<0.05": false,
+      "stress2x>0": false,
+      "anni>=5/7": false
+    },
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "NQ_C1_ORB": {
+    "giorni": 1746,
+    "trade": 1735,
+    "win_rate": 0.2345821325648415,
+    "payoff": 3.714355814904334,
+    "expectancy_pt_per_trade": 2.88902109510086,
+    "expectancy_usd_per_trade": 57.7804219020172,
+    "profit_factor": 1.1383605547184217,
+    "sharpe_ann": 0.6225067629183967,
+    "sortino_ann": 1.498192310024179,
+    "max_dd_usd": -33408.79600000007,
+    "pnl_tot_usd": 100249.0319999998,
+    "t_nw": 1.7351211580542671,
+    "p_unilaterale": 0.04135967371852156,
+    "gross_pt_per_trade": 3.3390210951008585,
+    "gross_usd_per_trade": 66.78042190201717,
+    "stress2x_media_pt": 2.4236549828178626,
+    "uscite": {
+      "stop": 0.755,
+      "time": 0.245
+    },
+    "anni_positivi": "5/7",
+    "pnl_pt_per_anno": {
+      "2017": -21.9,
+      "2018": 1415.8,
+      "2019": 485.9,
+      "2020": -33.1,
+      "2021": 1048.4,
+      "2022": 2042.1,
+      "2023": 75.2
+    },
+    "p_holm": 0.3308773897481725,
+    "criteri": {
+      "t>3": false,
+      "holm<0.05": false,
+      "stress2x>0": true,
+      "anni>=5/7": true
+    },
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "NQ_C2_gap": {
+    "giorni": 1746,
+    "trade": 1068,
+    "win_rate": 0.6132958801498127,
+    "payoff": 0.6431724657729389,
+    "expectancy_pt_per_trade": 0.4425868913857625,
+    "expectancy_usd_per_trade": 8.851737827715251,
+    "profit_factor": 1.0200434989861378,
+    "sharpe_ann": 0.08993432603354622,
+    "sortino_ann": 0.11503010549354527,
+    "max_dd_usd": -41176.406000000155,
+    "pnl_tot_usd": 9453.655999999883,
+    "t_nw": 0.2510177461728892,
+    "p_unilaterale": 0.4009001944489059,
+    "gross_pt_per_trade": 0.8925868913857617,
+    "gross_usd_per_trade": 17.851737827715233,
+    "stress2x_media_pt": -0.004534478808709964,
+    "uscite": {
+      "time": 0.528,
+      "target": 0.472
+    },
+    "anni_positivi": "4/7",
+    "pnl_pt_per_anno": {
+      "2017": 39.3,
+      "2018": -231.2,
+      "2019": -567.3,
+      "2020": 142.4,
+      "2021": -130.7,
+      "2022": 781.3,
+      "2023": 438.9
+    },
+    "p_holm": 1.0,
+    "criteri": {
+      "t>3": false,
+      "holm<0.05": false,
+      "stress2x>0": false,
+      "anni>=5/7": false
+    },
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "NQ_C3_VWAP": {
+    "giorni": 1746,
+    "trade": 1484,
+    "win_rate": 0.6293800539083558,
+    "payoff": 0.46477282821824256,
+    "expectancy_pt_per_trade": -6.254762477695365,
+    "expectancy_usd_per_trade": -125.09524955390731,
+    "profit_factor": 0.7892687664651611,
+    "sharpe_ann": -1.2048925565403674,
+    "sortino_ann": -1.331817123768246,
+    "max_dd_usd": -197598.04211205913,
+    "pnl_tot_usd": -185641.35033799848,
+    "t_nw": -3.2951050254647924,
+    "p_unilaterale": 0.9995080754901821,
+    "gross_pt_per_trade": -5.804762477695369,
+    "gross_usd_per_trade": -116.09524955390738,
+    "stress2x_media_pt": -5.6986640990263036,
+    "uscite": {
+      "target": 0.574,
+      "time": 0.426
+    },
+    "anni_positivi": "1/7",
+    "pnl_pt_per_anno": {
+      "2017": -236.3,
+      "2018": -547.5,
+      "2019": 188.1,
+      "2020": -1230.8,
+      "2021": -2752.1,
+      "2022": -4054.4,
+      "2023": -649.1
+    },
+    "p_holm": 1.0,
+    "criteri": {
+      "t>3": false,
+      "holm<0.05": false,
+      "stress2x>0": false,
+      "anni>=5/7": false
+    },
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "NQ_C4_FVG": {
+    "giorni": 1746,
+    "trade": 1347,
+    "win_rate": 0.35337787676317745,
+    "payoff": 1.8586759749183128,
+    "expectancy_pt_per_trade": 0.26106236080179906,
+    "expectancy_usd_per_trade": 5.221247216035981,
+    "profit_factor": 1.015763219358343,
+    "sharpe_ann": 0.08009859714941799,
+    "sortino_ann": 0.14126676012369277,
+    "max_dd_usd": -38483.47999999953,
+    "pnl_tot_usd": 7033.020000000459,
+    "t_nw": 0.20952075348462793,
+    "p_unilaterale": 0.4170208679818068,
+    "gross_pt_per_trade": 0.7110623608017987,
+    "gross_usd_per_trade": 14.221247216035975,
+    "stress2x_media_pt": -0.14576116838486722,
+    "uscite": {
+      "stop": 0.637,
+      "target": 0.309,
+      "time": 0.054
+    },
+    "anni_positivi": "5/7",
+    "pnl_pt_per_anno": {
+      "2017": -126.4,
+      "2018": 3.9,
+      "2019": 547.5,
+      "2020": -1225.1,
+      "2021": 213.8,
+      "2022": 577.9,
+      "2023": 360.0
+    },
+    "p_holm": 1.0,
+    "criteri": {
+      "t>3": false,
+      "holm<0.05": false,
+      "stress2x>0": false,
+      "anni>=5/7": true
+    },
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  }
+}
