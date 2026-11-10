@@ -71,3 +71,13 @@ Le commissioni sono stime da fonti secondarie (vedi `05_prop_firm_costi.md`) e v
 ## 7. Metriche riportate in ogni caso
 
 N giorni, N trade, win rate, payoff, expectancy in punti e in $ (ES e MES), profit factor, Sharpe annualizzato sul P&L giornaliero (√252), Sortino, max drawdown in $, t di Newey-West, p grezzo e p corretto con Holm, P&L per anno.
+
+## Emendamento 1 — 2026-11-10, registrato PRIMA di qualsiasi risultato
+
+**Motivo.** Dukascopy ha bannato l'IP del cloud dopo i limiti di velocità: il server accetta la connessione e non risponde, mentre il proxy funziona verso altri host. Sono stati scaricati 5 giorni di prova e nessun risultato T1 è stato calcolato.
+
+**Modifica (solo la fonte dati).** Si usano le barre a 1 minuto di Alpaca, feed SIP consolidato (tutte le borse USA), con `adjustment=all` (split e dividendi), per gli ETF **SPY** (proxy di ES) e **QQQ** (proxy di NQ), dal 2016-01-01. Ipotesi, varianti, periodi, costi e criteri di kill restano **identici**.
+
+**Conversione dei costi.** I costi restano in punti indice (sezione 4). Il P&L in punti indice equivalenti è `last_pts = (P16:00 − P15:30) × k`, con k = 10 per SPY (SPX ≈ 10 × SPY) e k = 41 per QQQ (NDX ≈ 41 × QQQ, rapporto stabile in un intervallo 40–42 dal 2016). L'errore sul peso dei costi è inferiore al 5%; vale come limite dichiarato.
+
+**Vantaggio della modifica.** È un dato di borsa con volume reale, ed è lo stesso strumento (SPY) del paper originale di Gao et al. (2018).
