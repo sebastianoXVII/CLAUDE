@@ -23,10 +23,12 @@ def trades_for(sym: str, k: float) -> pd.DataFrame:
     raw = pd.read_parquet(BARS / f"{sym}_1m_raw.parquet")
     raw.index = raw.index.tz_convert(E.TZ)
     rth = raw.between_time("09:30", "15:59")
-    rows, prev_close = [], None
+    rows, prev_close, skipped = [], None, []
     for d, g in rth.groupby(rth.index.date):
         ts = pd.Timestamp(d)
         if ts.weekday() >= 5 or ts in T1.EARLY_CLOSES or len(g) < 300:
+            prev_close = None  # emendamento 2: il giorno dopo una sessione scartata C2 non opera
+            skipped.append(ts)
             continue
         specs = {"C1_ORB": E.orb(g), "C2_gap": E.gap_fill(g, prev_close) if prev_close else None,
                  "C3_VWAP": E.vwap_magnet(g), "C4_FVG": E.fvg(g)}
@@ -38,6 +40,7 @@ def trades_for(sym: str, k: float) -> pd.DataFrame:
             rows.append({"date": ts, "concept": c, "traded": True,
                          "gross_pts": t["side"] * (r["p_out"] - t["p_in"]) * k, "reason": r["reason"]})
         prev_close = float(g["close"].iloc[-1])
+    print(f"{sym}: giorni scartati (chiusure anticipate o <300 barre): {len(skipped)}", flush=True)
     return pd.DataFrame(rows)
 
 
@@ -53,6 +56,7 @@ def main() -> None:
             net = (x["gross_pts"] - cost).where(traded, 0.0)
             m = T1.metrics(net, traded, usd)
             m["gross_pt_per_trade"] = float(x.loc[traded, "gross_pts"].mean())
+            m["gross_usd_per_trade"] = m["gross_pt_per_trade"] * usd
             m["stress2x_media_pt"] = float((x["gross_pts"] - 2 * cost).where(traded, 0.0).mean())
             reasons = x.loc[traded, "reason"].value_counts(normalize=True).round(3).to_dict()
             m["uscite"] = reasons

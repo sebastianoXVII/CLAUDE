@@ -66,3 +66,11 @@ Emersi scrivendo il codice; non cambiano le regole, colmano casi non specificati
 - **C2:** se a P[09:35] il gap è già chiuso (il prezzo ha già raggiunto o superato il close precedente), non si opera.
 - **C4:** conta solo il primo FVG ammesso della giornata. Se non viene ritestato entro le 14:59, quel giorno non si opera e non si cerca un secondo FVG. Nella barra d'ingresso, toccata per contatto, si controlla solo lo stop (conservativo).
 - **C3:** l'ingresso avviene al close della barra di deviazione; la simulazione parte dalla barra successiva.
+
+## Emendamento 2 — 2026-11-10, da code review, registrato PRIMA di qualsiasi risultato
+1. **Close precedente.** Se il giorno di sessione precedente è stato scartato (chiusura anticipata o dati insufficienti), il giorno dopo **C2 non opera**: non si misura il gap rispetto a un close di due sessioni prima.
+2. **Filtro di qualità dei dati (dichiarato).** Un giorno è valido se ha almeno 300 barre a 1 minuto RTH su 390, cioè circa il 77%. Il numero di giorni scartati viene riportato.
+3. **Gap già chiuso.** Il gap è considerato chiuso, e non si opera, se **una qualsiasi** barra 09:30–09:34 ha toccato il close precedente: low ≤ close precedente per un gap up, high ≥ close precedente per un gap down.
+4. **FVG solo su barre a 5 minuti contigue.** Le tre barre devono essere consecutive nel tempo (10 minuti fra la prima e la terza); i buchi nei dati, come gli halt del 2020, non generano FVG. Un FVG con rischio nullo (barra 1 piatta) non si opera.
+5. **Stop realistico sui gap.** Se una barra apre già oltre lo stop, l'uscita avviene all'open della barra: per i long min(open, stop), per gli short max(open, stop). Nella barra d'ingresso del FVG lo stop si controlla sul low/high, ma l'uscita è comunque al prezzo di stop, perché l'ingresso è avvenuto dentro la barra.
+6. **Note.** La finestra di C3 usa barre che **iniziano** fra 10:00 e 14:30. Sui giorni ex-dividendo il gap di C2 contiene il dividendo (bias contro C2, accettato e dichiarato). Si riporta anche l'expectancy lorda in $.

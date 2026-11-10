@@ -24,7 +24,12 @@ def simulate(b: pd.DataFrame, start: str, side: int, p_in: float, stop=None, tar
     w = b.loc[_t(b, start):_t(b, last_bar)]
     for i, (_, bar) in enumerate(w.iterrows()):
         if stop is not None and ((side == 1 and bar["low"] <= stop) or (side == -1 and bar["high"] >= stop)):
-            return {"p_out": float(stop), "reason": "stop"}
+            # emendamento 2: se la barra apre gia' oltre lo stop si esce all'open (non nella barra d'ingresso)
+            if i == 0 and entry_bar_stop:
+                fill = stop
+            else:
+                fill = min(bar["open"], stop) if side == 1 else max(bar["open"], stop)
+            return {"p_out": float(fill), "reason": "stop"}
         if i == 0 and entry_bar_stop:
             continue
         if target is not None and ((side == 1 and bar["high"] >= target) or (side == -1 and bar["low"] <= target)):
@@ -55,7 +60,8 @@ def gap_fill(b: pd.DataFrame, prev_close: float) -> dict | None:
         return None
     side = -1 if gap > 0 else 1
     p_in = float(first["close"].iloc[-1])
-    if side * (prev_close - p_in) <= 0:  # gap gia' chiuso nei primi 5 minuti: niente da prendere
+    touched = first["low"].min() <= prev_close if gap > 0 else first["high"].max() >= prev_close
+    if touched or side * (prev_close - p_in) <= 0:  # emendamento 2: gap gia' chiuso nei primi 5 minuti
         return None
     return _trade(side, p_in, None, float(prev_close), "09:35", last_bar="11:59")
 
@@ -75,9 +81,11 @@ def vwap_magnet(b: pd.DataFrame) -> dict | None:
 
 
 def fvg(b: pd.DataFrame) -> dict | None:
-    r5 = b.resample("5min", origin=_t(b, "09:30")).agg({"open": "first", "high": "max", "low": "min", "close": "last"}).dropna()
+    r5 = b.resample("5min", origin=_t(b, "09:30")).agg({"open": "first", "high": "max", "low": "min", "close": "last"})
     for i in range(len(r5) - 2):
-        b1, b3 = r5.iloc[i], r5.iloc[i + 2]
+        b1, b2, b3 = r5.iloc[i], r5.iloc[i + 1], r5.iloc[i + 2]
+        if b1.isna().any() or b2.isna().any() or b3.isna().any():  # emendamento 2: solo barre 5m contigue e piene
+            continue
         closes_at = r5.index[i + 2] + pd.Timedelta(minutes=5)
         if not (_t(b, "09:45") <= closes_at <= _t(b, "14:00")):
             continue
@@ -86,6 +94,8 @@ def fvg(b: pd.DataFrame) -> dict | None:
         elif b3["high"] < b1["low"]:
             side, entry, stop = -1, float(b1["low"]), float(b1["high"])
         else:
+            continue
+        if entry == stop:  # emendamento 2: FVG con rischio nullo non si opera
             continue
         after = b.loc[closes_at:_t(b, "14:59")]
         touch = after["low"] <= entry if side == 1 else after["high"] >= entry
