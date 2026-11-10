@@ -114,3 +114,12 @@ Nessun parametro si ritocca dopo aver visto i dati.
 
 ## 8. Esecuzione
 Tre invocazioni separate (`scoperta`, `convalida`, `holdout`), ognuna con un file di guardia: non si riesegue, e ogni stadio rifiuta di partire se lo stadio precedente non ha scritto il suo file. Lo stadio di scoperta **non calcola nulla dopo il 2017-12-31**. Codice sviluppato con TDD e revisionato in modo indipendente prima di qualsiasi esecuzione.
+
+## Emendamento 1 — 2026-11-10, dalla code review, registrato PRIMA di qualsiasi calcolo di rendimento
+Il revisore ha fatto solo controlli strutturali sui prezzi, cioè se un prezzo esiste a un dato orario. Nessun P&L è stato calcolato.
+1. **Ancora degli indici.** Con la definizione originale, "16:00 del giorno di calendario precedente", il lunedì P è indefinito nel 100% dei casi, perché la domenica alle 16:00 non ci sono barre, e lo stesso vale nei giorni dopo un festivo. Nuova definizione: **P(16:00) della sessione NYSE precedente**. È il rendimento dalla chiusura della sessione precedente, che era l'intento.
+2. **Ancora di forex e oro.** L'oro non quota fra le 17:00 e le 18:00 ET, quindi P(18:00) esiste solo nello 0,2–5% dei giorni. Nuova ancora per tutti e tre gli strumenti: **P(18:10) del giorno di calendario precedente**. La copertura fino al 2017 è del 98,8–99,9%: è stato misurato solo se il prezzo esiste.
+3. **Dati dichiarati.** SPXUSD parte dal **2010-11-14**, non dal 2010-01 come scritto nella §2. Nel 2012–2014 e nel 2017 ha meno giorni validi (229–234). La regola di inclusione dei giorni usa barre successive all'entrata: è un condizionamento sulla sola disponibilità dei dati, ereditato dai test precedenti e dichiarato.
+4. **Integrità.** All'avvio di ogni stadio si crea un file `T14_<stadio>.started`. Se esiste, lo stadio non riparte, anche dopo un crash. Il file dei risultati viene scritto prima di ogni altro file accessorio.
+
+Tutto il resto è invariato, compreso il numero di 3.276 configurazioni.
