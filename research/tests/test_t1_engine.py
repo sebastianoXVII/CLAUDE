@@ -153,3 +153,37 @@ def test_verdict_in_sample_requires_all_criteria():
 def test_verdict_holdout_needs_t_above_1_5():
     assert E.verdict({"t_nw": 1.6}, "holdout")[1] is True
     assert E.verdict({"t_nw": 1.4}, "holdout")[1] is False
+
+
+# ---------- emendamento 1: punti indice equivalenti ----------
+
+def test_daily_points_scales_last_pts_to_index_points():
+    b = make_bars({"2024-03-11": day(100, 100, 100, 100), "2024-03-12": day(100, 100, 500.0, 501.0)})
+    d = E.daily_points(b, window=1, k=10.0)
+    assert d.loc["2024-03-12", "last_pts"] == pytest.approx(10.0)
+    assert d.loc["2024-03-12", "r1"] == pytest.approx(0.0)  # i rendimenti non dipendono da k
+
+
+# ---------- valutazione end-to-end ----------
+
+def test_evaluate_reports_all_variants_with_holm_and_verdict():
+    rng = np.random.default_rng(9)
+    d1 = synthetic_daily(n=600, seed=3)
+    d2 = synthetic_daily(n=600, seed=4)
+    d1["last_pts"] += rng.normal(0, 1.0, len(d1))  # segnale forte ma rumoroso
+    d2["last_pts"] = rng.normal(0, 1.0, len(d2))  # puro rumore
+    spec = {"A": (d1, 50.0, 5.0, 0.33, 0.49), "B": (d2, 20.0, 2.0, 0.45, 0.85)}
+    res = E.evaluate(spec, "in_sample")
+    assert set(res) == {f"{n}_{v}" for n in "AB" for v in ("V1", "V2", "V3", "V4", "BENCH_long")}
+    for k in (f"{n}_{v}" for n in "AB" for v in ("V1", "V2", "V3", "V4")):
+        assert "p_holm" in res[k] and "SOPRAVVIVE" in res[k] and "criteri" in res[k]
+    assert "p_holm" not in res["A_BENCH_long"]  # il benchmark non entra nella famiglia dei test
+    assert res["A_V1"]["t_nw"] > 3
+    assert res["A_V1"]["SOPRAVVIVE"] is True  # segnale forte: deve passare
+    assert res["B_V1"]["SOPRAVVIVE"] is False  # rumore puro: deve morire
+
+
+def test_years_criterion_is_a_fraction_of_five_sevenths():
+    ok = {"t_nw": 3.5, "media_pt_stress2x": 0.1, "p_holm": 0.01, "diff_vs_bench_pt_medio": 0.2}
+    assert E.verdict({**ok, "anni_positivi": "3/3"}, "in_sample")[1] is True
+    assert E.verdict({**ok, "anni_positivi": "2/3"}, "in_sample")[1] is False

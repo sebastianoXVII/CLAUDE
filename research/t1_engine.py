@@ -22,9 +22,10 @@ def price_at(day_bars: pd.DataFrame, t: pd.Timestamp) -> float:
     return float(s.iloc[-1])
 
 
-def daily_points(bars: pd.DataFrame, window: int = 252) -> pd.DataFrame:
+def daily_points(bars: pd.DataFrame, window: int = 252, k: float = 1.0) -> pd.DataFrame:
     """Da barre a 1 minuto (indice UTC) a una riga per giorno valido. 'thr' usa solo giorni precedenti;
-    resta NaN finche' la finestra non e' piena (le righe si scartano in fase di valutazione)."""
+    resta NaN finche' la finestra non e' piena (le righe si scartano in fase di valutazione).
+    k converte il movimento dello strumento in punti indice equivalenti (emendamento 1: SPY k=10, QQQ k=41)."""
     b = bars.copy()
     b.index = b.index.tz_convert(TZ)
     rows = []
@@ -38,7 +39,7 @@ def daily_points(bars: pd.DataFrame, window: int = 252) -> pd.DataFrame:
     df = df.dropna(subset=["prev_close"])
     df["r1"] = np.log(df["p1000"] / df["prev_close"])
     df["r12"] = np.log(df["p1530"] / df["p1500"])
-    df["last_pts"] = df["p1600"] - df["p1530"]
+    df["last_pts"] = (df["p1600"] - df["p1530"]) * k
     df["thr"] = df["r1"].abs().shift(1).rolling(window, min_periods=window).quantile(2 / 3)
     return df
 
@@ -105,9 +106,34 @@ def verdict(m: dict, period: str) -> tuple[dict[str, bool], bool]:
             "t>3": m["t_nw"] > 3.0,
             "stress2x>0": m["media_pt_stress2x"] > 0,
             "holm<0.05": m["p_holm"] < 0.05,
-            "anni>=5/7": pos >= 5,
+            "anni>=5/7": pos * 7 >= 5 * yrs,
             "batte_bench": m["diff_vs_bench_pt_medio"] > 0,
         }
     else:
         checks = {"t>1.5": m["t_nw"] > 1.5}
     return checks, all(bool(v) for v in checks.values())
+
+
+def evaluate(spec: dict, period: str) -> dict:
+    """spec: {nome: (giornaliero, $/pt pieno, $/pt micro, costo base pt, costo micro pt)} gia' filtrato sul periodo."""
+    res, pvals = {}, {}
+    for name, (daily, usd_full, usd_micro, c_base, c_micro) in spec.items():
+        df = daily.dropna(subset=["thr"])
+        base, stress2, micro = run_variants(df, c_base), run_variants(df, 2 * c_base), run_variants(df, c_micro)
+        for v, (pnl, traded) in base.items():
+            key = f"{name}_{v}"
+            m = metrics(pnl, traded, usd_full)
+            m["media_pt_stress2x"] = float(stress2[v][0].mean())
+            m["media_pt_micro"] = float(micro[v][0].mean())
+            m["expectancy_usd_micro"] = float(micro[v][0][traded].mean() * usd_micro) if traded.any() else np.nan
+            yearly = pnl.groupby(pnl.index.year).sum()
+            m["pnl_pt_per_anno"] = {int(y): round(float(x), 2) for y, x in yearly.items()}
+            m["anni_positivi"] = f"{int((yearly > 0).sum())}/{len(yearly)}"
+            if v != "BENCH_long":
+                m["diff_vs_bench_pt_medio"] = float((pnl - base["BENCH_long"][0]).mean())
+                pvals[key] = m["p_unilaterale"]
+            res[key] = m
+    for k, p in holm(pvals).items():
+        res[k]["p_holm"] = p
+        res[k]["criteri"], res[k]["SOPRAVVIVE"] = verdict(res[k], period)
+    return res
