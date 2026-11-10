@@ -77,7 +77,7 @@ def run(inst: str, period: str, keep=None, jr=None):
                     view = frame.loc[E._ts(D, "19:30", True):E._ts(D, "15:59")]
                     charts.trade_chart(view.resample("5min").agg({"open": "first", "high": "max", "low": "min", "close": "last"}).dropna(),
                                        png, title=f"T8 {h} {inst} {D.date()} {'LONG' if t['side'] == 1 else 'SHORT'} {r['reason']} {gross - cost:+.1f} pt",
-                                       entry=(t["start"], t["p_in"]), stop=t["stop"], target=t["target"], exit=(r["t_out"], r["p_out"]),
+                                       entry=(t["start"], t["p_in"]), side=t["side"], stop=t["stop"], target=t["target"], exit=(r["t_out"], r["p_out"]),
                                        boxes=[("Asia", E._ts(D, "20:00", True), E._ts(D, "23:59", True), asia[1], asia[0]),
                                               ("London", E._ts(D, "02:00"), E._ts(D, "08:29"), lon[1], lon[0]),
                                               ("NY", E._ts(D, "09:30"), E._ts(D, "15:59"),

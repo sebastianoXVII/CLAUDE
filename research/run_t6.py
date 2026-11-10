@@ -120,7 +120,7 @@ def main() -> None:
             png = CHARTS / f"{inst}_{d}_{t['entry_time'].replace(':', '')}.png"
             charts.trade_chart(g, png, title=f"T6 Noise Area {inst} ({sym}) {d} {'LONG' if t['side'] == 1 else 'SHORT'} "
                                f"{t['reason']} netto {t['net_pts']:+.2f} pt",
-                               entry=(t0, t["entry"]), exit=(t1, t["exit"]),
+                               entry=(t0, t["entry"]), exit=(t1, t["exit"]), side=int(t["side"]),
                                levels={"UB@entry": t["ub_entry"], "LB@entry": t["lb_entry"]})
             jr.add({"strategy": "T6_noise_area", "instrument": inst, "date": str(d), "side": int(t["side"]),
                     "entry_time": str(t0), "entry": t["entry"], "exit_time": str(t1), "exit": t["exit"],

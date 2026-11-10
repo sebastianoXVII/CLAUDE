@@ -18,8 +18,12 @@ def _ts(x):
     return t.tz_localize(TZ) if t.tzinfo is None else t.tz_convert(TZ)
 
 
+def entry_marker(side: int) -> str:
+    return "^" if side >= 0 else "v"
+
+
 def trade_chart(bars: pd.DataFrame, out: Path, title: str, entry: tuple, stop=None, target=None, exit=None,
-                boxes=(), levels=None) -> Path:
+                boxes=(), levels=None, side: int = 1) -> Path:
     """bars: OHLC con indice ET. entry/exit: (orario, prezzo). boxes: (nome, inizio, fine, low, high)."""
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -44,7 +48,7 @@ def trade_chart(bars: pd.DataFrame, out: Path, title: str, entry: tuple, stop=No
         ax.axhline(lvl, color="#8e44ad", linestyle=":", linewidth=1)
         ax.text(0, lvl, f" {name} {lvl:,.2f}", color="#8e44ad", fontsize=8, va="bottom")
     ei = xi(entry[0])
-    ax.scatter([ei], [entry[1]], marker="^", s=90, color="#1f6feb", zorder=5, label=f"entry {entry[1]:,.2f}")
+    ax.scatter([ei], [entry[1]], marker=entry_marker(side), s=90, color="#1f6feb", zorder=5, label=f"entry {entry[1]:,.2f}")
     if stop is not None:
         ax.axhline(stop, color="#c0392b", linestyle="--", linewidth=1, label=f"stop {stop:,.2f}")
     if target is not None:

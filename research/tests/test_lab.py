@@ -54,3 +54,10 @@ def test_chart_renders_png_with_annotations(tmp_path):
                              levels={"PDH": 102.5})
     assert out.exists() and out.stat().st_size > 5000
     assert out.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_chart_accepts_side_and_marks_short_with_down_triangle(tmp_path):
+    b = bars([(101, 99, 100)] * 30)
+    assert charts.entry_marker(1) == "^" and charts.entry_marker(-1) == "v"
+    out = charts.trade_chart(b, tmp_path / "s.png", title="short", entry=("2024-03-12 10:05", 100.0), side=-1)
+    assert out.exists()
