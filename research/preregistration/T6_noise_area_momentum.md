@@ -41,3 +41,9 @@ Il periodo di test è 2025-01-02 → fine. Sopravvive (**edge candidato**) se va
 ## 5. Informazioni aggiuntive (non decisionali)
 - Si riporta anche il periodo 2017–2024: è **dentro il campione** degli autori, quindi non vale come evidenza. Serve solo a verificare che la nostra implementazione riproduca all'ingrosso il loro risultato.
 - Ogni trade del periodo fuori campione va nel **diario** (`research/lab`), con MFE/MAE e screenshot.
+
+## Emendamento 1 — chiarimenti registrati PRIMA di qualsiasi risultato
+- **Rientro dopo uno stop:** si rientra dal momento di decisione **successivo**, non nello stesso. Il paper non specifica il caso; questa è la scelta meno soggetta a churn.
+- **Ordine delle verifiche a ogni momento di decisione:** prima l'inversione sulla banda opposta, poi il trailing stop, poi l'eventuale nuovo ingresso.
+- **Giorno precedente scartato:** se il giorno valido precedente è stato scartato (chiusura anticipata o meno di 300 barre), il close delle 16:00 non è disponibile e quel giorno non si opera.
+- **Diario:** i trade fuori campione vengono salvati in `research/results/journal.sqlite`. Gli screenshot vanno in `data/charts/T6/`, fuori dal repository per dimensione, e si rigenerano dal diario.
