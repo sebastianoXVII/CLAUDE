@@ -46,6 +46,9 @@ def evaluate(tr, armed, s, e, cost_bp):
 def main():
     if OUT.exists():
         sys.exit("T12 gia' eseguito.")
+    missing = [f for sym in (*INSTR, "QQQ") for f in (f"{sym}_1m.parquet", f"{sym}_1m_raw.parquet") if not (R6.BARS / f).exists()]
+    if missing:
+        sys.exit(f"Dati mancanti, T12 non eseguito: {missing}")
     res, pv, dailies = {}, {}, {}
     qtr, qarmed = daily_returns("QQQ", COST_QQQ_BP)
     for sym, c in INSTR.items():
@@ -66,7 +69,7 @@ def main():
     for per in PERIODS:
         df = pd.DataFrame({k: dailies[(per, k)] for k in ("QQQ", *INSTR)}).dropna()
         corr[per] = df.corr().round(2).to_dict()
-    out = {"risultati": res, "correlazioni_rendimenti_giornalieri": corr}
+    out = {"nota_unita": "valori in bp; i campi *_usd* e win_rate/expectancy di T1.metrics sono per GIORNO con trade, in bp", "risultati": res, "correlazioni_PnL_strategia_giornaliero": corr}
     OUT.write_text(json.dumps(out, indent=2, default=str, ensure_ascii=False))
     cols = ["n_trades", "trade", "win_rate", "netto_bp_per_trade", "sharpe_ann", "t_nw", "p_holm", "stress2x_media_bp", "CONFERMA"]
     print(pd.DataFrame(res).T.reindex(columns=cols).to_string(float_format=lambda v: f"{v:,.2f}"))
