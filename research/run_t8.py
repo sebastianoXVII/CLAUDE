@@ -88,7 +88,7 @@ def run(inst: str, period: str, keep=None, jr=None):
                             "r_multiple": (gross / abs(t["p_in"] - t["stop"])) if t["stop"] else None,
                             "pnl_pts": gross, "pnl_net_pts": gross - cost, "mfe_pts": ps["mfe_pts"], "mae_pts": ps["mae_pts"],
                             "mfe_r": ps["mfe_r"], "mae_r": ps["mae_r"], "minutes": ps["minutes"], "sample": period,
-                            "chart": str(png.relative_to(ROOT)), "context": {"htf_trend": trend, "asia": asia, "london": lon}})
+                            "chart": (str(png.relative_to(ROOT)) if png.is_relative_to(ROOT) else str(png)), "context": {"htf_trend": trend, "asia": asia, "london": lon}})
     return pd.DataFrame(rows), pd.DatetimeIndex(valid)
 
 
