@@ -1,0 +1,131 @@
+{
+  "info_in_sample_autori_2017_2024|ES": {
+    "giorni": 1977,
+    "trade": 1182,
+    "win_rate": 0.4357021996615905,
+    "payoff": 1.682541589205444,
+    "expectancy_pt_per_trade": 1.672953468697132,
+    "expectancy_usd_per_trade": 83.6476734348566,
+    "profit_factor": 1.2991138207508302,
+    "sharpe_ann": 1.0425456920612386,
+    "sortino_ann": 1.7987347926370847,
+    "max_dd_usd": -14230.350000000008,
+    "pnl_tot_usd": 98871.55000000051,
+    "t_nw": 3.2202828552686142,
+    "p_unilaterale": 0.0006403208526174486,
+    "n_trades": 1733,
+    "trade_win_rate": 0.39007501442585113,
+    "gross_pt_per_trade": 1.4710450086555158,
+    "net_usd_per_trade": 57.05225043277584,
+    "stress2x_media_pt": 0.7109463834092109,
+    "uscite": {
+      "stop": 0.664,
+      "close": 0.334,
+      "reversal": 0.002
+    },
+    "pnl_pt_per_anno": {
+      "2017": -102.4,
+      "2018": 400.7,
+      "2019": -28.2,
+      "2020": 117.4,
+      "2021": 350.8,
+      "2022": 622.0,
+      "2023": 419.0,
+      "2024": 198.1
+    }
+  },
+  "OOS_2025|ES": {
+    "giorni": 458,
+    "trade": 283,
+    "win_rate": 0.4028268551236749,
+    "payoff": 1.3948107991165022,
+    "expectancy_pt_per_trade": -0.6346784452297196,
+    "expectancy_usd_per_trade": -31.73392226148598,
+    "profit_factor": 0.9408782905282913,
+    "sharpe_ann": -0.24299546686593,
+    "sortino_ann": -0.43475495630583927,
+    "max_dd_usd": -38232.60000000025,
+    "pnl_tot_usd": -8980.700000000545,
+    "t_nw": -0.34821908674651536,
+    "p_unilaterale": 0.6361621727056253,
+    "n_trades": 423,
+    "trade_win_rate": 0.35697399527186763,
+    "gross_pt_per_trade": -0.09461938534281567,
+    "net_usd_per_trade": -21.230969267140747,
+    "stress2x_media_pt": -0.6969519650655254,
+    "uscite": {
+      "stop": 0.683,
+      "close": 0.317
+    },
+    "pnl_pt_per_anno": {
+      "2025": -28.1,
+      "2026": -151.5
+    },
+    "passa_singolo": false
+  },
+  "info_in_sample_autori_2017_2024|NQ": {
+    "giorni": 1978,
+    "trade": 1170,
+    "win_rate": 0.45213675213675214,
+    "payoff": 1.818030671178281,
+    "expectancy_pt_per_trade": 10.34452487179485,
+    "expectancy_usd_per_trade": 206.89049743589698,
+    "profit_factor": 1.5003716459490026,
+    "sharpe_ann": 1.5894552450004398,
+    "sortino_ann": 2.924284162349722,
+    "max_dd_usd": -14618.021999999954,
+    "pnl_tot_usd": 242061.88199999946,
+    "t_nw": 5.149969922681768,
+    "p_unilaterale": 1.3026411749272881e-07,
+    "n_trades": 1694,
+    "trade_win_rate": 0.40968122786304606,
+    "gross_pt_per_trade": 7.594683648169996,
+    "net_usd_per_trade": 142.89367296339995,
+    "stress2x_media_pt": 5.733465166835173,
+    "uscite": {
+      "stop": 0.646,
+      "close": 0.353,
+      "reversal": 0.001
+    },
+    "pnl_pt_per_anno": {
+      "2017": 301.6,
+      "2018": 1910.6,
+      "2019": 123.9,
+      "2020": 1183.0,
+      "2021": 1547.3,
+      "2022": 2602.2,
+      "2023": 2220.6,
+      "2024": 2213.9
+    }
+  },
+  "OOS_2025|NQ": {
+    "giorni": 458,
+    "trade": 259,
+    "win_rate": 0.4555984555984556,
+    "payoff": 1.6174962604821572,
+    "expectancy_pt_per_trade": 16.63424440154437,
+    "expectancy_usd_per_trade": 332.68488803088735,
+    "profit_factor": 1.353649352743933,
+    "sharpe_ann": 1.1150658941703848,
+    "sortino_ann": 2.4134527242192694,
+    "max_dd_usd": -32959.95599999982,
+    "pnl_tot_usd": 86165.38599999987,
+    "t_nw": 1.5799719181943641,
+    "p_unilaterale": 0.05705664881063477,
+    "n_trades": 387,
+    "trade_win_rate": 0.40310077519379844,
+    "gross_pt_per_trade": 11.582478811369489,
+    "net_usd_per_trade": 222.64957622738976,
+    "stress2x_media_pt": 9.02646135371177,
+    "uscite": {
+      "stop": 0.651,
+      "close": 0.349
+    },
+    "pnl_pt_per_anno": {
+      "2025": 1688.2,
+      "2026": 2620.0
+    },
+    "passa_singolo": false
+  },
+  "ESITO": "T6 MORTO"
+}
