@@ -60,3 +60,9 @@ Per ogni concetto e strumento:
 - N trade, win rate, payoff, expectancy lorda e netta (punti e $), profit factor, Sharpe, max drawdown, t, p con Holm, anni positivi;
 - frequenza di raggiungimento del target (C2–C4);
 - frequenza di stop (C1, C4).
+
+## Emendamento 1 — 2026-11-10, chiarimenti registrati PRIMA di qualsiasi risultato
+Emersi scrivendo il codice; non cambiano le regole, colmano casi non specificati.
+- **C2:** se a P[09:35] il gap è già chiuso (il prezzo ha già raggiunto o superato il close precedente), non si opera.
+- **C4:** conta solo il primo FVG ammesso della giornata. Se non viene ritestato entro le 14:59, quel giorno non si opera e non si cerca un secondo FVG. Nella barra d'ingresso, toccata per contatto, si controlla solo lo stop (conservativo).
+- **C3:** l'ingresso avviene al close della barra di deviazione; la simulazione parte dalla barra successiva.
