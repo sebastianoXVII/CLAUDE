@@ -83,6 +83,11 @@ def load(inst: str, end: str):
     b = b[b.index < pd.Timestamp(end, tz=E.TZ) + pd.Timedelta(days=1)]  # niente dati oltre la fine del periodo
     days = valid_days(b, kind)
     grid = E.price_grid(b, days, E.offsets(kind))
+    if kind == "index":  # emendamento 1: ancora = P(16:00) della sessione NYSE precedente
+        first = pd.Timestamp(b.index.min().date())
+        sess = pd.DatetimeIndex(sorted(d for d in NYSE if first <= d <= pd.Timestamp(end)))
+        p16 = E.price_grid(b, sess, [E.CLOSE])[E.CLOSE]
+        grid["prev_close"] = p16.shift(1).reindex(days).to_numpy()
     return kind, cost, usd, days, grid
 
 
@@ -99,6 +104,10 @@ def main(argv: list[str]) -> None:
         sys.exit(f"manca lo stadio precedente ({PREV[stage]}): non si esegue {stage}.")
     if (OUT / FILES[stage]).exists():
         sys.exit(f"stadio {stage} gia' eseguito: non si riesegue.")
+    lock = OUT / f"T14_{stage}.started"
+    if lock.exists():
+        sys.exit(f"stadio {stage} gia' avviato in passato (lock presente): non si riesegue.")
+    lock.write_text(pd.Timestamp.now(tz="UTC").isoformat())
     end = PERIODS[stage][1]
     if stage == "scoperta":
         rows = []
@@ -113,9 +122,9 @@ def main(argv: list[str]) -> None:
                 rows.append({"inst": inst, **c, **s, "usd_per_trade_net": s["mean_net"] * len(pdays) / max(s["n_trades"], 1) * usd})
                 rows[-1]["pass"] = E.stage1_pass(rows[-1])
             print(f"{inst}: {len(cfgs)} configurazioni, {len(pdays)} giorni, {sum(r['pass'] for r in rows if r['inst'] == inst)} passano", flush=True)
-        assert len(rows) == 3276, len(rows)
+        expected = sum(len(E.configs(v[1])) for v in INSTR.values())
+        assert len(rows) == expected, len(rows)
         sel = select(rows)
-        pd.DataFrame([{k: v for k, v in r.items() if k != "per_anno"} for r in rows]).to_parquet(OUT / "T14_scoperta_tutte.parquet")
         res = {"n_config": len(rows), "n_passano_stadio1": int(sum(r["pass"] for r in rows)),
                "falsi_positivi_attesi_H0": round(len(rows) * 2 * (1 - stats.norm.cdf(3.0)), 1),
                "selezionate": [{**r, "key": key(r)} for r in sel]}
@@ -141,6 +150,10 @@ def main(argv: list[str]) -> None:
         res = {"n_candidate": len(evals), "valutate": evals,
                ("sopravvissute" if stage == "convalida" else "EDGE_CANDIDATI"): surv}
     (OUT / FILES[stage]).write_text(json.dumps(res, indent=2, default=str, ensure_ascii=False))
+    if stage == "scoperta":
+        tab = pd.DataFrame([{k: v for k, v in r.items() if k != "per_anno"} for r in rows])
+        tab[["H", "L"]] = tab[["H", "L"]].astype(str)
+        tab.to_parquet(OUT / "T14_scoperta_tutte.parquet")
     summary = {k: v for k, v in res.items() if k not in ("valutate", "selezionate")}
     print(json.dumps(summary, indent=2, default=str)[:4000])
     if stage == "scoperta":

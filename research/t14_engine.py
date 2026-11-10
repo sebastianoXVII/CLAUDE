@@ -7,7 +7,7 @@ import pandas as pd
 
 TZ = "America/New_York"
 LOOKBACKS = [30, 60, 120, "anchor"]
-ANCHOR = {"index": -480, "fx": -360}  # 16:00 / 18:00 del giorno precedente
+ANCHOR = {"index": "prev_close", "fx": -350}  # emendamento 1: close della sessione NYSE precedente / 18:10 del giorno prima
 CLOSE = 960  # 16:00
 MIN_YEAR_DAYS = 60
 
@@ -33,7 +33,7 @@ def configs(kind: str) -> list[dict]:
 
 
 def offsets(kind: str) -> list[int]:
-    s = {ANCHOR[kind], CLOSE}
+    s = {CLOSE} | ({ANCHOR[kind]} if kind == "fx" else set())
     for e, h in eh_pairs(kind):
         s |= {e, CLOSE if h == "close" else e + h} | {e - lb for lb in (30, 60, 120)}
     return sorted(s)

@@ -105,8 +105,20 @@ def test_stage1_rule():
     assert not E.stage1_pass({**good, "years_pos": 4})
 
 
-def test_price_grid_wall_clock_on_dst_change_day():
-    # 2015-03-08 e' il giorno del cambio ora: le 10:00 devono restare le 10:00 di parete
-    b = bars(["2015-03-08 09:59"], [5.0])
-    g = E.price_grid(b, pd.DatetimeIndex(["2015-03-08"]), [600])
-    assert g.loc["2015-03-08", 600] == 5.0
+def test_price_grid_wall_clock_on_monday_after_dst_change():
+    # domenica 2015-03-08 cambio ora: lunedi' l'ancora delle 18:10 di domenica e le 10:00 restano ore di parete
+    b = bars(["2015-03-08 18:08", "2015-03-09 09:58"], [4.0, 5.0])
+    g = E.price_grid(b, pd.DatetimeIndex(["2015-03-09"]), [-350, 600])
+    assert g.loc["2015-03-09", -350] == 4.0 and g.loc["2015-03-09", 600] == 5.0
+
+
+def test_tolerance_edges_t_minus_5_in_t_minus_6_out():
+    d = pd.DatetimeIndex(["2015-03-02"])
+    assert E.price_grid(bars(["2015-03-02 09:55"], [1.0]), d, [600]).iloc[0, 0] == 1.0
+    assert np.isnan(E.price_grid(bars(["2015-03-02 09:54"], [1.0]), d, [600]).iloc[0, 0])
+
+
+def test_anchors_per_amendment_1():
+    assert E.ANCHOR == {"index": "prev_close", "fx": -350}
+    assert all(isinstance(o, int) for o in E.offsets("index")) and min(E.offsets("index")) >= 450
+    assert -350 in E.offsets("fx")

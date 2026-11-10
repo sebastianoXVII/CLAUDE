@@ -76,3 +76,64 @@ def test_stages_refuse_out_of_order_and_rerun(tmp_path, monkeypatch):
 def test_periods_match_preregistration():
     assert R.PERIODS == {"scoperta": (None, "2017-12-31"), "convalida": ("2018-01-01", "2021-12-31"),
                          "holdout": ("2022-01-01", "2024-12-31")}
+
+
+def _synthetic_index(path, start="2017-06-01", end="2018-03-31", seed=1):
+    sess = [d for d in R.T1._XNYS.sessions if pd.Timestamp(start) <= d <= pd.Timestamp(end)]
+    idx = []
+    for d in sess:
+        idx += list(pd.date_range(f"{d.date()} 07:00", f"{d.date()} 16:30", freq="1min", tz=TZ))
+    idx = pd.DatetimeIndex(idx)
+    px = 1000 + np.cumsum(np.random.default_rng(seed).normal(0, 0.3, len(idx)))
+    pd.DataFrame({"open": px, "high": px, "low": px, "close": px, "volume": 0.0}, index=idx.tz_convert("UTC")).to_parquet(path)
+    return pd.DataFrame({"close": px}, index=idx)
+
+
+@pytest.fixture
+def one_index(tmp_path, monkeypatch):
+    b = _synthetic_index(tmp_path / "XYZ_1m_24h.parquet")
+    monkeypatch.setattr(R, "BARS", tmp_path)
+    monkeypatch.setattr(R, "OUT", tmp_path)
+    monkeypatch.setattr(R, "INSTR", {"NQ": ("XYZ", "index", 0.45, 20.0)})
+    return tmp_path, b
+
+
+def test_load_truncates_after_period_end_and_adds_prev_session_close(one_index):
+    tmp, b = one_index
+    kind, cost, usd, days, grid = R.load("NQ", "2017-12-31")
+    assert days.max() <= pd.Timestamp("2017-12-31")
+    # lunedi' 2017-06-12: ancora = P(16:00) di venerdi' 2017-06-09 (ultima barra 15:59)
+    assert grid.loc["2017-06-12", "prev_close"] == b.loc["2017-06-09 15:59", "close"]
+    # dopo il 4 luglio (festivo): mercoledi' 07-05 -> sessione precedente lunedi' 07-03
+    assert grid.loc["2017-07-05", "prev_close"] == b.loc["2017-07-03 15:59", "close"]
+
+
+def test_scoperta_end_to_end_writes_guard_lock_and_refuses_rerun(one_index):
+    tmp, _b = one_index
+    R.main(["scoperta"])
+    res = json.loads((tmp / "T14_scoperta.json").read_text())
+    assert res["n_config"] == 396
+    assert (tmp / "T14_scoperta_tutte.parquet").exists() and (tmp / "T14_scoperta.started").exists()
+    with pytest.raises(SystemExit):
+        R.main(["scoperta"])
+
+
+def test_started_lock_blocks_restart_after_crash(one_index):
+    tmp, _b = one_index
+    (tmp / "T14_scoperta.started").write_text("x")
+    with pytest.raises(SystemExit, match="avviato"):
+        R.main(["scoperta"])
+
+
+def test_convalida_roundtrip_with_close_and_anchor_config(one_index):
+    tmp, _b = one_index
+    cfg = {"inst": "NQ", "family": "M", "E": 600, "H": "close", "L": "anchor", "d": 1}
+    cfg["key"] = R.key(cfg)
+    (tmp / "T14_scoperta.json").write_text(json.dumps({"selezionate": [cfg]}))
+    R.main(["convalida"])
+    res = json.loads((tmp / "T14_convalida.json").read_text())
+    assert res["n_candidate"] == 1 and res["valutate"][0]["key"] == cfg["key"] and "p_holm" in res["valutate"][0]
+
+
+def test_full_grid_is_3276_configs():
+    assert sum(len(R.E.configs(v[1])) for v in R.INSTR.values()) == 3276
