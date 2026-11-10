@@ -61,3 +61,12 @@
 
 ## 5. Diario
 Ogni trade va in `journal.sqlite` (strategia `T8_<ipotesi>`), con screenshot che mostrano i box di sessione Asia/Londra/NY, i livelli e la presa di liquidità, MFE/MAE ed etichette di contesto. Serve anche per la ricerca dei trade simili.
+
+## Emendamento 1 — chiarimenti di implementazione registrati PRIMA di qualsiasi dato
+- **Barre a 5 minuti:** allineate alla mezzanotte ET; l'etichetta è l'inizio della barra; la barra "chiude" all'etichetta + 5 minuti; l'ingresso avviene al suo close e la simulazione parte dalla barra a 1 minuto successiva.
+- **H8a:** vale anche lo sweep con wick, cioè la barra dello sweep che chiude già dentro il range. "Entro 30 minuti" significa che la barra che chiude dentro inizia al massimo 25 minuti dopo l'inizio della barra dello sweep. Lo stop è l'estremo fra la barra dello sweep e quella d'ingresso. Conta solo il primo sweep; se il rientro non avviene in tempo, quel giorno non si opera.
+- **H8b:** se dopo la rottura non ci sono 3 barre a 5 minuti disponibili nella finestra, non si opera. Lo stop del riassorbimento è l'estremo fra la barra di rottura e quella di rientro.
+- **H8c:** lo sweep va cercato fra le 09:30 e le 10:55 (inizio barra), e il rientro può avvenire nella stessa barra o in una successiva della finestra.
+- **H8d:** si usa il **primo FVG** (fra quelli formati dalle 08:30, su 3 barre a 5 minuti contigue) **che viene invalidato**. Ingresso al tocco del bordo dalle 11:29 in poi non ammesso; nella barra d'ingresso si controlla solo lo stop.
+- **H8e:** conta solo il **primo displacement** della finestra (servono 20 barre a 5 minuti precedenti per la media). Se l'order block non viene ritestato entro le 11:59, quel giorno non si opera.
+- **Tutte:** rischio nullo significa nessun trade.
