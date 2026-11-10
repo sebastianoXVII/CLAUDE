@@ -47,3 +47,22 @@ Il periodo di test è 2025-01-02 → fine. Sopravvive (**edge candidato**) se va
 - **Ordine delle verifiche a ogni momento di decisione:** prima l'inversione sulla banda opposta, poi il trailing stop, poi l'eventuale nuovo ingresso.
 - **Giorno precedente scartato:** se il giorno valido precedente è stato scartato (chiusura anticipata o meno di 300 barre), il close delle 16:00 non è disponibile e quel giorno non si opera.
 - **Diario:** i trade fuori campione vengono salvati in `research/results/journal.sqlite`. Gli screenshot vanno in `data/charts/T6/`, fuori dal repository per dimensione, e si rigenerano dal diario.
+
+## Emendamento 2 — 2026-11-10, registrato PRIMA di qualsiasi risultato
+Deriva da una code review indipendente e dalla lettura del **codice Python ufficiale degli autori**: concretumgroup.com, pagina "Python backtesting – Beat the Market", linkata nella FAQ Q1 del paper. Il testo del paper era ambiguo su ingresso e stop; il codice no.
+1. **Regola del segnale (dal codice degli autori).** A ogni momento di decisione la posizione **diventa** il segnale, poi resta invariata fino al momento successivo:
+   - +1 se P > UB **e** P > VWAP;
+   - −1 se P < LB **e** P < VWAP;
+   - 0 altrimenti.
+
+   Lo stop è quindi implicito: si chiude quando la condizione non è più vera. L'inversione avviene quando il segnale passa da +1 a −1 o viceversa. La regola di Emendamento 1 sul rientro dopo lo stop decade: con questa definizione non può più accadere di entrare oltre il proprio stop.
+2. **Dividendi (dal codice degli autori).** Nel giorno ex-dividendo il close precedente usato per le bande è close_raw(t−1) − dividendo. Il dividendo si ricava dai dati già scaricati: D = close_raw(t−1) × (1 − f(t)/f(t−1)), con f = close rettificato / close grezzo. Si considera solo se D > 0,001 × prezzo.
+3. **Regola decisionale, sequenza fissa.**
+   - SPY, lo strumento del paper, si testa per primo: t > 1,65 (unilaterale al 5%) e media > 0 con stress 2×.
+   - Solo se SPY passa si testa QQQ con lo stesso criterio.
+   - Se passano tutti e due → candidato forte. Se passa solo SPY → candidato debole. Se SPY non passa → **T6 MORTO**, qualunque sia il risultato di QQQ (che si riporta comunque).
+4. **Qualità dei dati.**
+   - σ si calcola solo sui giorni con tutti i prezzi di decisione presenti, cioè i 14 giorni completi precedenti, senza che un giorno incompleto azzeri i 14 successivi.
+   - I giorni senza prezzo alle 16:00 sono esclusi.
+   - Il P&L giornaliero si calcola sui soli giorni in cui la strategia era operativa.
+5. **Esecuzione.** I risultati si salvano prima degli screenshot. Il runner rifiuta una seconda esecuzione del fuori campione.
