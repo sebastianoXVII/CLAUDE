@@ -1,0 +1,199 @@
+<title>Diario trade Noise Area</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: banco di revisione del trader — riepilogo in alto, filtri, griglia di schede-trade, pannello di dettaglio sovrapposto */
+:root {
+  --bg: #f4f6f8; --surface: #ffffff; --ink: #17212b; --muted: #5d6b78; --line: #dde3e9;
+  --accent: #1d6a86; --gain: #1c7a4b; --loss: #b0393a; --chip: #e8eef2;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f141a; --surface: #161d25; --ink: #e5ebf1; --muted: #93a1ae; --line: #26313c;
+  --accent: #5fb4d1; --gain: #4cc38a; --loss: #ef7b73; --chip: #1f2a35; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #161d25; --ink: #e5ebf1; --muted: #93a1ae; --line: #26313c;
+  --accent: #5fb4d1; --gain: #4cc38a; --loss: #ef7b73; --chip: #1f2a35; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px; }
+h1 { font: 600 clamp(26px, 4vw, 34px)/1.1 var(--f-display); margin: 0; text-wrap: balance; letter-spacing: .01em; }
+h2 { font: 600 18px/1.2 var(--f-display); margin: 0; letter-spacing: .02em; }
+.eyebrow { font: 500 12px/1 var(--f-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.lede { margin: 6px 0 0; color: var(--muted); max-width: 70ch; }
+.note { border-left: 3px solid var(--accent); background: var(--surface); padding: 10px 14px; color: var(--muted); font-size: 14px; max-width: 90ch; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.stat { background: var(--surface); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.stat b { font: 500 22px/1.1 var(--f-mono); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+.curve { background: var(--surface); border: 1px solid var(--line); padding: 10px 14px; display: grid; gap: 6px; }
+.curve svg { width: 100%; height: 120px; display: block; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; }
+.filters label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+select { font: 14px var(--f-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-width: 120px; }
+select:focus-visible, button:focus-visible, .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.count { font: 13px var(--f-mono); color: var(--muted); margin-left: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer; display: grid; text-align: left; padding: 0; color: inherit; font: inherit; }
+.card:hover { border-color: var(--accent); }
+.card img { width: 100%; aspect-ratio: 1100 / 503; object-fit: cover; background: var(--chip); display: block; }
+.card .meta { padding: 10px 12px; display: grid; gap: 6px; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.chip { font: 500 11px/1 var(--f-mono); padding: 4px 7px; border-radius: 4px; background: var(--chip); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.chip.long { color: var(--gain); } .chip.short { color: var(--loss); }
+.pnl { font: 500 15px var(--f-mono); font-variant-numeric: tabular-nums; }
+.pos { color: var(--gain); } .neg { color: var(--loss); }
+.small { font-size: 12px; color: var(--muted); font-family: var(--f-mono); }
+.panel { position: fixed; inset: 0; background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(3px); display: grid; place-items: start center; overflow-y: auto; z-index: 20;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+.panel[hidden] { display: none; }
+.sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; width: min(1100px, 100%); display: grid; gap: 14px; padding: 16px; min-width: 0; }
+.sheet img { width: 100%; border-radius: 6px; border: 1px solid var(--line); }
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; }
+.kv div { display: grid; gap: 2px; } .kv span { font-size: 12px; color: var(--muted); } .kv b { font: 500 15px var(--f-mono); font-variant-numeric: tabular-nums; }
+.sim { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.sim .card img { aspect-ratio: 1100 / 503; }
+button.close { justify-self: end; font: 500 13px var(--f-body); background: var(--chip); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.nav { display: flex; gap: 8px; }
+.nav button { font: 13px var(--f-body); background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow">Diario di ricerca</div>
+    <h1>Diario trade Noise Area</h1>
+    <p class="lede" id="lede"></p>
+  </header>
+  <p class="note">Candidato, non ancora un edge confermato. Questi sono i trade fuori campione (gen 2025 → nov 2026) della strategia Noise Area replicata su QQQ, convertiti in punti NQ (×41) e al netto dei costi MNQ. Prezzi d'ingresso e d'uscita sono in dollari QQQ, P&amp;L e MFE/MAE in punti NQ. La conferma decisiva è il test T7 su NQ 2008–2016. I "trade simili" usano solo informazioni note prima dell'ingresso: lato, orario, ampiezza della Noise Area e distanza dalla banda.</p>
+
+  <section class="stats" id="stats" aria-label="Statistiche dei trade filtrati"></section>
+  <section class="curve" aria-label="Curva del P&amp;L cumulato">
+    <div class="row"><h2>P&amp;L cumulato (punti NQ, filtro attivo)</h2><span class="small" id="curveLabel"></span></div>
+    <svg id="curve" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Curva del P&amp;L cumulato"></svg>
+  </section>
+
+  <section class="filters" aria-label="Filtri">
+    <label for="fOutcome">Esito<select id="fOutcome"><option value="">Tutti</option><option value="win">Vincenti</option><option value="loss">Perdenti</option></select></label>
+    <label for="fReason">Uscita<select id="fReason"><option value="">Tutte</option><option value="close">Chiusura 16:00</option><option value="stop">Stop (banda o VWAP)</option><option value="reversal">Inversione</option></select></label>
+    <label for="fSide">Lato<select id="fSide"><option value="">Entrambi</option><option value="1">Long</option><option value="-1">Short</option></select></label>
+    <label for="fHour">Ora d'ingresso<select id="fHour"><option value="">Tutte</option></select></label>
+    <label for="fMonth">Mese<select id="fMonth"><option value="">Tutti</option></select></label>
+    <label for="fSort">Ordina<select id="fSort"><option value="date">Data</option><option value="net-desc">P&amp;L migliore</option><option value="net-asc">P&amp;L peggiore</option><option value="mfe">MFE più alto</option></select></label>
+    <span class="count" id="count"></span>
+  </section>
+
+  <section class="grid" id="grid" aria-label="Trade"></section>
+</div>
+
+<div class="panel" id="panel" hidden>
+  <article class="sheet" id="sheet" aria-live="polite"></article>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const T = DATA.trades, M = DATA.meta, byId = new Map(T.map(t => [t.id, t]));
+const $ = s => document.querySelector(s);
+const fmt = (x, d = 1) => (x > 0 ? "+" : "") + x.toFixed(d);
+const usd = x => (x < 0 ? "−" : "+") + "$" + Math.abs(x).toFixed(0);
+$("#eyebrow").textContent = `${M.strategy.replace(/_/g, " ")} · ${M.instrument} · ${M.sample.replace("_", " ")}`;
+$("#lede").textContent = `${M.n} trade, ognuno con lo screenshot dell'ingresso, il percorso (MFE/MAE) e come è finito. Tocca un trade per aprirlo.`;
+
+const hours = [...new Set(T.map(t => t.t_in))].sort(), months = [...new Set(T.map(t => t.date.slice(0, 7)))].sort();
+hours.forEach(h => $("#fHour").add(new Option(h, h)));
+months.forEach(m => $("#fMonth").add(new Option(m, m)));
+
+function filtered() {
+  const o = $("#fOutcome").value, r = $("#fReason").value, s = $("#fSide").value, h = $("#fHour").value, m = $("#fMonth").value;
+  let x = T.filter(t => (!o || (o === "win" ? t.net > 0 : t.net <= 0)) && (!r || t.reason === r) && (!s || String(t.side) === s)
+    && (!h || t.t_in === h) && (!m || t.date.startsWith(m)));
+  const k = $("#fSort").value;
+  if (k === "net-desc") x = [...x].sort((a, b) => b.net - a.net);
+  else if (k === "net-asc") x = [...x].sort((a, b) => a.net - b.net);
+  else if (k === "mfe") x = [...x].sort((a, b) => b.mfe - a.mfe);
+  return x;
+}
+
+function stats(x) {
+  const n = x.length, w = x.filter(t => t.net > 0), l = x.filter(t => t.net <= 0);
+  const sum = a => a.reduce((s, t) => s + t.net, 0), mean = a => a.length ? sum(a) / a.length : 0;
+  const pf = l.length && sum(l) !== 0 ? sum(w) / -sum(l) : Infinity;
+  const cells = [
+    ["Trade", n], ["Win rate", n ? (100 * w.length / n).toFixed(0) + "%" : "—"],
+    ["Esito medio (pt NQ)", n ? fmt(mean(x)) : "—"], ["Per 1 MNQ / trade", n ? usd(mean(x) * M.usd_per_pt_micro) : "—"],
+    ["Vincente medio", w.length ? fmt(mean(w)) : "—"], ["Perdente medio", l.length ? fmt(mean(l)) : "—"],
+    ["Profit factor", n ? (isFinite(pf) ? pf.toFixed(2) : "∞") : "—"],
+    ["MFE / MAE medi", n ? `${fmt(x.reduce((s, t) => s + t.mfe, 0) / n)} / ${fmt(x.reduce((s, t) => s + t.mae, 0) / n)}` : "—"],
+  ];
+  $("#stats").innerHTML = cells.map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join("");
+  const byDate = [...x].sort((a, b) => (a.date + a.t_in).localeCompare(b.date + b.t_in));
+  let c = 0; const pts = byDate.map(t => (c += t.net));
+  const svg = $("#curve");
+  if (!pts.length) { svg.innerHTML = ""; $("#curveLabel").textContent = ""; return; }
+  const lo = Math.min(0, ...pts), hi = Math.max(0, ...pts), span = hi - lo || 1;
+  const X = i => (pts.length === 1 ? 500 : 6 + i * 988 / (pts.length - 1)), Y = v => 112 - (v - lo) / span * 104;
+  const d = pts.map((v, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join("");
+  svg.innerHTML = `<line x1="0" x2="1000" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    <path d="${d} L${X(pts.length - 1)},${Y(0)} L${X(0)},${Y(0)} Z" fill="var(--accent)" opacity=".12"/>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    <circle cx="${X(pts.length - 1)}" cy="${Y(pts[pts.length - 1])}" r="4" fill="var(--accent)"/>`;
+  $("#curveLabel").textContent = `${byDate[0].date} → ${byDate[byDate.length - 1].date} · finale ${fmt(pts[pts.length - 1], 0)} pt (${usd(pts[pts.length - 1] * M.usd_per_pt_micro)} per 1 MNQ)`;
+}
+
+const card = (t, small) => `<button class="card" data-id="${t.id}" aria-label="Trade del ${t.date} ${t.side === 1 ? "long" : "short"}, ${fmt(t.net)} punti">
+  <img loading="lazy" src="${t.img}" alt="Grafico del trade ${t.date}">
+  <div class="meta"><div class="row"><span class="small">${t.date} · ${t.t_in}</span><span class="pnl ${t.net > 0 ? "pos" : "neg"}">${fmt(t.net)}</span></div>
+  ${small ? "" : `<div class="row"><span class="chip ${t.side === 1 ? "long" : "short"}">${t.side === 1 ? "Long" : "Short"}</span><span class="chip">${t.reason === "close" ? "chiusura" : t.reason}</span><span class="small">MFE ${fmt(t.mfe)} · MAE ${fmt(t.mae)}</span></div>`}</div></button>`;
+
+let current = [];
+function render() {
+  current = filtered();
+  $("#count").textContent = `${current.length} di ${T.length} trade`;
+  $("#grid").innerHTML = current.map(t => card(t)).join("");
+  stats(current);
+}
+
+function open(id) {
+  const t = byId.get(id); if (!t) return;
+  const idx = current.findIndex(u => u.id === id);
+  const sim = t.similar.map(i => byId.get(i)).filter(Boolean);
+  const simAvg = sim.length ? sim.reduce((s, u) => s + u.net, 0) / sim.length : 0;
+  $("#sheet").innerHTML = `<div class="row"><div><div class="eyebrow">${t.side === 1 ? "Long" : "Short"} · uscita: ${t.reason === "close" ? "chiusura 16:00" : t.reason}</div>
+      <h2>${t.date} · ${t.t_in} → ${t.t_out}</h2></div>
+      <div class="nav"><button id="prev" ${idx <= 0 ? "disabled" : ""}>← Precedente</button><button id="next" ${idx < 0 || idx >= current.length - 1 ? "disabled" : ""}>Successivo →</button><button class="close" id="close">Chiudi</button></div></div>
+    <img src="${t.img}" alt="Grafico del trade ${t.date}">
+    <div class="kv">
+      <div><span>Esito netto</span><b class="${t.net > 0 ? "pos" : "neg"}">${fmt(t.net)} pt · ${usd(t.net * M.usd_per_pt_micro)} per MNQ</b></div>
+      <div><span>Lordo</span><b>${fmt(t.gross)} pt</b></div>
+      <div><span>MFE (massimo a favore)</span><b>${fmt(t.mfe)} pt</b></div>
+      <div><span>MAE (massimo contro)</span><b>${fmt(t.mae)} pt</b></div>
+      <div><span>Durata</span><b>${t.min} min</b></div>
+      <div><span>Ingresso / uscita (QQQ)</span><b>${t.entry} / ${t.exit}</b></div>
+      <div><span>Ampiezza Noise Area</span><b>${t.band_pct.toFixed(2)}%</b></div>
+      <div><span>Distanza dalla banda</span><b>${t.dist_pct.toFixed(3)}%</b></div>
+    </div>
+    <div class="row"><h2>Trade simili prima dell'ingresso</h2><span class="small">esito medio dei ${sim.length}: <span class="${simAvg > 0 ? "pos" : "neg"}">${fmt(simAvg)} pt</span></span></div>
+    <div class="sim">${sim.map(u => card(u, true)).join("")}</div>`;
+  $("#panel").hidden = false;
+  try { history.replaceState(null, "", "#t-" + id); } catch (e) {}
+  $("#close").onclick = closePanel;
+  if (idx > 0) $("#prev").onclick = () => open(current[idx - 1].id);
+  if (idx >= 0 && idx < current.length - 1) $("#next").onclick = () => open(current[idx + 1].id);
+  $("#panel").scrollTop = 0;
+}
+function closePanel() { $("#panel").hidden = true; try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
+
+document.addEventListener("click", e => {
+  const c = e.target.closest(".card"); if (c) { open(Number(c.dataset.id)); return; }
+  if (e.target.id === "panel") closePanel();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#panel").hidden) closePanel(); });
+["#fOutcome", "#fReason", "#fSide", "#fHour", "#fMonth", "#fSort"].forEach(s => $(s).addEventListener("change", render));
+render();
+const m = location.hash.match(/^#t-(\d+)$/); if (m) open(Number(m[1]));
+window.addEventListener("hashchange", () => { const k = location.hash.match(/^#t-(\d+)$/); if (k) open(Number(k[1])); });
+</script>
