@@ -1,0 +1,182 @@
+{
+  "f15_lb7|2017-2024": {
+    "sharpe": 1.28,
+    "t": 3.99,
+    "trade": 2241,
+    "usd_trade_MNQ": 9.1
+  },
+  "f15_lb7|2025-2026": {
+    "sharpe": 0.37,
+    "t": 0.53,
+    "trade": 548,
+    "usd_trade_MNQ": 5.5
+  },
+  "f15_lb10|2017-2024": {
+    "sharpe": 1.22,
+    "t": 3.75,
+    "trade": 2243,
+    "usd_trade_MNQ": 8.6
+  },
+  "f15_lb10|2025-2026": {
+    "sharpe": 0.49,
+    "t": 0.72,
+    "trade": 530,
+    "usd_trade_MNQ": 7.4
+  },
+  "f15_lb14|2017-2024": {
+    "sharpe": 1.24,
+    "t": 3.83,
+    "trade": 2192,
+    "usd_trade_MNQ": 8.9
+  },
+  "f15_lb14|2025-2026": {
+    "sharpe": 0.54,
+    "t": 0.82,
+    "trade": 498,
+    "usd_trade_MNQ": 8.3
+  },
+  "f15_lb20|2017-2024": {
+    "sharpe": 1.26,
+    "t": 3.89,
+    "trade": 2136,
+    "usd_trade_MNQ": 9.4
+  },
+  "f15_lb20|2025-2026": {
+    "sharpe": 0.37,
+    "t": 0.61,
+    "trade": 501,
+    "usd_trade_MNQ": 5.7
+  },
+  "f15_lb30|2017-2024": {
+    "sharpe": 1.12,
+    "t": 3.46,
+    "trade": 2119,
+    "usd_trade_MNQ": 8.6
+  },
+  "f15_lb30|2025-2026": {
+    "sharpe": 0.2,
+    "t": 0.34,
+    "trade": 485,
+    "usd_trade_MNQ": 3.2
+  },
+  "f30_lb7|2017-2024": {
+    "sharpe": 1.65,
+    "t": 5.1,
+    "trade": 1729,
+    "usd_trade_MNQ": 15.0
+  },
+  "f30_lb7|2025-2026": {
+    "sharpe": 0.62,
+    "t": 0.85,
+    "trade": 424,
+    "usd_trade_MNQ": 11.5
+  },
+  "f30_lb10|2017-2024": {
+    "sharpe": 1.45,
+    "t": 4.56,
+    "trade": 1699,
+    "usd_trade_MNQ": 13.2
+  },
+  "f30_lb10|2025-2026": {
+    "sharpe": 0.65,
+    "t": 0.92,
+    "trade": 418,
+    "usd_trade_MNQ": 11.9
+  },
+  "f30_lb14|2017-2024": {
+    "sharpe": 1.5,
+    "t": 4.86,
+    "trade": 1694,
+    "usd_trade_MNQ": 13.5
+  },
+  "f30_lb14|2025-2026": {
+    "sharpe": 1.07,
+    "t": 1.52,
+    "trade": 387,
+    "usd_trade_MNQ": 21.5
+  },
+  "f30_lb20|2017-2024": {
+    "sharpe": 1.48,
+    "t": 4.69,
+    "trade": 1629,
+    "usd_trade_MNQ": 14.1
+  },
+  "f30_lb20|2025-2026": {
+    "sharpe": 0.68,
+    "t": 0.99,
+    "trade": 389,
+    "usd_trade_MNQ": 13.6
+  },
+  "f30_lb30|2017-2024": {
+    "sharpe": 1.38,
+    "t": 4.47,
+    "trade": 1625,
+    "usd_trade_MNQ": 13.6
+  },
+  "f30_lb30|2025-2026": {
+    "sharpe": 0.58,
+    "t": 0.88,
+    "trade": 381,
+    "usd_trade_MNQ": 12.1
+  },
+  "f60_lb7|2017-2024": {
+    "sharpe": 1.56,
+    "t": 5.0,
+    "trade": 1292,
+    "usd_trade_MNQ": 17.9
+  },
+  "f60_lb7|2025-2026": {
+    "sharpe": 0.9,
+    "t": 1.35,
+    "trade": 302,
+    "usd_trade_MNQ": 22.2
+  },
+  "f60_lb10|2017-2024": {
+    "sharpe": 1.49,
+    "t": 4.79,
+    "trade": 1278,
+    "usd_trade_MNQ": 17.4
+  },
+  "f60_lb10|2025-2026": {
+    "sharpe": 0.9,
+    "t": 1.45,
+    "trade": 291,
+    "usd_trade_MNQ": 23.6
+  },
+  "f60_lb14|2017-2024": {
+    "sharpe": 1.63,
+    "t": 5.26,
+    "trade": 1266,
+    "usd_trade_MNQ": 18.5
+  },
+  "f60_lb14|2025-2026": {
+    "sharpe": 1.18,
+    "t": 1.72,
+    "trade": 280,
+    "usd_trade_MNQ": 31.6
+  },
+  "f60_lb20|2017-2024": {
+    "sharpe": 1.47,
+    "t": 4.72,
+    "trade": 1252,
+    "usd_trade_MNQ": 17.3
+  },
+  "f60_lb20|2025-2026": {
+    "sharpe": 1.08,
+    "t": 1.62,
+    "trade": 280,
+    "usd_trade_MNQ": 29.5
+  },
+  "f60_lb30|2017-2024": {
+    "sharpe": 1.53,
+    "t": 5.06,
+    "trade": 1236,
+    "usd_trade_MNQ": 18.7
+  },
+  "f60_lb30|2025-2026": {
+    "sharpe": 1.18,
+    "t": 1.76,
+    "trade": 272,
+    "usd_trade_MNQ": 33.2
+  }
+}
