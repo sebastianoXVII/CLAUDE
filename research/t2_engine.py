@@ -51,11 +51,22 @@ def candidate_levels(row: pd.Series, family: str) -> list[tuple[str, int, float]
     return out
 
 
-def admitted(day_bars: pd.DataFrame, level: float, s: int) -> bool:
-    """Il prezzo a 09:35 deve stare dalla parte giusta: sotto i livelli superiori, sopra quelli inferiori."""
+def _reached(b: pd.DataFrame, level: float, s: int) -> bool:
+    return bool(((b["high"] >= level) if s == 1 else (b["low"] <= level)).any())
+
+
+def admitted(day_bars: pd.DataFrame, level: float, s: int, family: str = "PM") -> bool:
+    """Ammesso se a 09:35 il prezzo sta dalla parte giusta E il livello non e' gia' stato raggiunto
+    nelle barre 09:30-09:34 (emendamento 1); per PD neanche nel pre-market 04:00-09:29."""
     d = day_bars.index[0].date()
     p = price_at(day_bars, pd.Timestamp(f"{d} 09:35", tz=TZ))
-    return bool(not np.isnan(p) and s * (level - p) > 0)
+    if np.isnan(p) or s * (level - p) <= 0:
+        return False
+    if _reached(day_bars.between_time("09:30", "09:34"), level, s):
+        return False
+    if family == "PD" and _reached(day_bars.between_time("04:00", "09:29"), level, s):
+        return False
+    return True
 
 
 def first_cross(day_bars: pd.DataFrame, level: float, s: int, H: int, k: float) -> dict | None:
@@ -68,7 +79,7 @@ def first_cross(day_bars: pd.DataFrame, level: float, s: int, H: int, k: float) 
     if not hit.any():
         return None
     tau = hit.idxmax()
-    p_in = float(day_bars.loc[tau, "close"].iloc[-1] if isinstance(day_bars.loc[tau, "close"], pd.Series) else day_bars.loc[tau, "close"])
+    p_in = float(day_bars.loc[tau, "close"])
     p_out = price_at(day_bars, tau + ONE_MIN + pd.Timedelta(minutes=H))
     if np.isnan(p_out):
         return None
@@ -77,23 +88,32 @@ def first_cross(day_bars: pd.DataFrame, level: float, s: int, H: int, k: float) 
     return {"t_in": tau, "p_in": p_in, "y": s * (p_out - p_in) * k, "swept": swept}
 
 
+EV_COLS = ["date", "kind", "s", "level", "t_in", "p_in", "y", "swept", "dist", "bucket", "side"]
+FAMILY_COLS = {"PD": ["pd_high", "pd_low", "prev_range"], "PM": ["pm_high", "pm_low", "prev_range"]}
+
+
 def events(bars: pd.DataFrame, family: str, H: int, k: float) -> pd.DataFrame:
-    lv = day_levels(bars).dropna()
+    """Eventi di primo attraversamento per livelli veri e placebo, con le variabili di controllo dell'emendamento 1."""
+    assert bars.index.is_unique and bars.index.is_monotonic_increasing, "indice barre non unico/ordinato"
+    lv = day_levels(bars).dropna(subset=FAMILY_COLS[family])
     b = bars.copy()
     b.index = b.index.tz_convert(TZ)
-    rth = b.between_time("09:30", "15:59")
+    b = b.between_time("04:00", "15:59")
     rows = []
-    for d, g in rth.groupby(rth.index.date):
+    for d, g in b.groupby(b.index.date):
         ts = pd.Timestamp(d)
         if ts not in lv.index:
             continue
-        for kind, s, lvl in candidate_levels(lv.loc[ts], family):
-            if not admitted(g, lvl, s):
+        p935 = price_at(g, pd.Timestamp(f"{d} 09:35", tz=TZ))
+        for kind, s_, lvl in candidate_levels(lv.loc[ts], family):
+            if not admitted(g, lvl, s_, family):
                 continue
-            ev = first_cross(g, lvl, s, H, k)
+            ev = first_cross(g, lvl, s_, H, k)
             if ev:
-                rows.append({"date": ts, "kind": kind, "s": s, "level": lvl, **ev})
-    return pd.DataFrame(rows)
+                mins = (ev["t_in"] - pd.Timestamp(f"{d} 09:35", tz=TZ)).total_seconds() / 60
+                rows.append({"date": ts, "kind": kind, "s": s_, "level": lvl, **ev,
+                             "dist": abs(lvl - p935) / lv.loc[ts, "prev_range"], "bucket": int(mins // 30), "side": s_})
+    return pd.DataFrame(rows, columns=EV_COLS)
 
 
 def p_two_sided(t: float) -> float:
@@ -112,6 +132,10 @@ def stage1(ev: pd.DataFrame) -> dict:
     if "swept" in df:
         out["sweep_true"] = float(tr["swept"].mean())
         out["sweep_placebo"] = float(pl["swept"].mean())
+    if {"dist", "bucket", "side"} <= set(df.columns):
+        fa = smf.ols("y ~ is_true + dist + C(bucket) + C(side)", data=df).fit(
+            cov_type="cluster", cov_kwds={"groups": df["cl"]})
+        out["coef_adj"], out["t_adj"] = float(fa.params["is_true"]), float(fa.tvalues["is_true"])
     return out
 
 
@@ -122,7 +146,8 @@ def stage1_survivors(results: dict) -> list[tuple]:
     adj = holm({k: v["p"] for k, v in results.items()})
     for k, p in adj.items():
         results[k]["p_holm"] = p
-    ok = {k for k, v in results.items() if abs(v["t"]) > 3 and v["p_holm"] < 0.05}
+    ok = {k for k, v in results.items() if abs(v["t"]) > 3 and v["p_holm"] < 0.05
+          and abs(v.get("t_adj", 0.0)) > 3 and np.sign(v.get("coef_adj", 0.0)) == np.sign(v["coef"])}
     out = []
     for k in ok:
         inst, fam, H = k
@@ -130,3 +155,21 @@ def stage1_survivors(results: dict) -> list[tuple]:
         if twins and all(np.sign(results[o]["coef"]) == np.sign(results[k]["coef"]) for o in twins):
             out.append(k)
     return sorted(out)
+
+
+def stage2(ev: pd.DataFrame, direction: float, cost: float, valid_days: pd.DatetimeIndex, usd_per_pt: float) -> dict:
+    """Regola: a ogni attraversamento si entra nella direzione s x segno(effetto), uscita dopo H. P&L giornaliero
+    sui soli giorni validi (emendamento 1). Metriche per trade calcolate per singolo trade."""
+    from t1_engine import metrics
+    per_trade = direction * ev["y"] - cost
+    daily = per_trade.groupby(ev["date"]).sum().reindex(valid_days, fill_value=0.0)
+    m = metrics(daily, daily.index.isin(ev["date"]), usd_per_pt)
+    m["n_trades"] = int(len(ev))
+    m["per_trade_pt"] = float(per_trade.mean()) if len(ev) else np.nan
+    m["per_trade_usd"] = m["per_trade_pt"] * usd_per_pt
+    m["trade_win_rate"] = float((per_trade > 0).mean()) if len(ev) else np.nan
+    stress = (direction * ev["y"] - 2 * cost).groupby(ev["date"]).sum().reindex(valid_days, fill_value=0.0)
+    m["stress2x_media_pt"] = float(stress.mean())
+    yr = daily.groupby(daily.index.year).sum()
+    m["anni_positivi"] = f"{int((yr > 0).sum())}/{len(yr)}"
+    return m

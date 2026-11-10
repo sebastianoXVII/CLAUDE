@@ -35,33 +35,27 @@ def main() -> None:
     tab = pd.DataFrame({f"{a}_{b}_H{c}": v for (a, b, c), v in res.items()}).T
     print("\n=== STADIO 1 (in-sample 2017-2023): y = punti indice nella direzione della rottura ===")
     print(tab[["n_true", "n_placebo", "mean_y_true", "mean_y_placebo", "coef", "t", "p", "p_holm",
-               "sweep_true", "sweep_placebo"]].to_string(float_format=lambda v: f"{v:,.4f}"))
+               "coef_adj", "t_adj", "sweep_true", "sweep_placebo"]].to_string(float_format=lambda v: f"{v:,.4f}"))
     print(f"\nSopravvissuti stadio 1: {surv or 'NESSUNO -> T2 MORTO'}")
     stage2 = {}
+    lv_cache = {}
     for key in surv:
         inst, fam, H = key
-        _sym, _k, usd, cost = INSTR[inst]
+        sym, _k, usd, cost = INSTR[inst]
+        if sym not in lv_cache:
+            lv_cache[sym] = E.day_levels(pd.read_parquet(BARS / f"{sym}_1m_raw.parquet"))
+        valid = lv_cache[sym].dropna(subset=E.FAMILY_COLS[fam]).loc[IS[0]:IS[1]].index
         ev, d = evs[key], np.sign(res[key]["coef"])
-        days = pd.bdate_range(*IS)
         for kind in ("true", "placebo"):
-            e = ev[ev["kind"] == kind]
-            per_trade = d * e["y"] - cost
-            daily = per_trade.groupby(e["date"]).sum().reindex(days, fill_value=0.0)
-            traded = daily != 0
-            m = T1.metrics(daily, traded, usd)
-            m["per_trade_pt"] = float(per_trade.mean())
-            m["stress2x_media_pt"] = float((d * e["y"] - 2 * cost).groupby(e["date"]).sum().reindex(days, fill_value=0.0).mean())
-            yr = daily.groupby(daily.index.year).sum()
-            m["anni_positivi"] = f"{int((yr > 0).sum())}/{len(yr)}"
-            stage2[f"{inst}_{fam}_H{H}_{kind}"] = m
-        t, p = stage2[f"{inst}_{fam}_H{H}_true"], stage2[f"{inst}_{fam}_H{H}_placebo"]
+            stage2[f"{inst}_{fam}_H{H}_{kind}"] = E.stage2(ev[ev["kind"] == kind], d, cost, valid, usd)
+        t = stage2[f"{inst}_{fam}_H{H}_true"]
         pos, yrs = map(int, t["anni_positivi"].split("/"))
-        t["criteri"] = {"t>3": t["t_nw"] > 3, "stress2x>0": t["stress2x_media_pt"] > 0,
-                        "anni>=5/7": pos * 7 >= 5 * yrs, "batte_placebo": t["per_trade_pt"] > p["per_trade_pt"]}
+        # 'batte_placebo' e' automatico dopo lo stadio 1 (emendamento 1): riportato, non e' evidenza indipendente
+        t["criteri"] = {"t>3": t["t_nw"] > 3, "stress2x>0": t["stress2x_media_pt"] > 0, "anni>=5/7": pos * 7 >= 5 * yrs}
         t["SOPRAVVIVE"] = all(t["criteri"].values())
     if stage2:
         print("\n=== STADIO 2 (tradabilita', costi base) ===")
-        print(pd.DataFrame(stage2).T.reindex(columns=["trade", "win_rate", "per_trade_pt", "expectancy_usd_per_trade",
+        print(pd.DataFrame(stage2).T.reindex(columns=["n_trades", "trade_win_rate", "per_trade_pt", "per_trade_usd",
               "profit_factor", "sharpe_ann", "max_dd_usd", "t_nw", "stress2x_media_pt", "anni_positivi", "SOPRAVVIVE"]
               ).to_string(float_format=lambda v: f"{v:,.3f}"))
     out = {"stage1": {f"{a}_{b}_H{c}": v for (a, b, c), v in res.items()},
