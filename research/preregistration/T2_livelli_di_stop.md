@@ -62,3 +62,23 @@ Per ogni combinazione:
 - frequenza di "sweep": quota di eventi in cui entro H minuti il close torna dalla parte opposta del livello, per livelli veri e placebo.
 
 Per lo stadio 2: le stesse metriche di T1, sezione 7.
+
+## Emendamento 1 — 2026-11-10, registrato PRIMA di qualsiasi risultato
+
+Deriva da una code review indipendente. T2 non è ancora stato eseguito.
+
+1. **Fattori confondenti: distanza dall'apertura e ora dell'attraversamento.** I livelli veri, soprattutto PM, stanno più vicini all'apertura dei placebo, e vengono attraversati prima. In una simulazione senza alcun effetto dei livelli ma con giorni di trend, questo produce un coefficiente spurio negativo, cioè un falso "sweep", con t fino a −3,2. Per sopravvivere allo stadio 1 una combinazione deve quindi superare **anche** una regressione con controlli:
+   `y ~ vero + dist + C(fascia_oraria) + C(lato)`, dove:
+   - `dist` = |livello − P[09:35]| / R;
+   - `fascia_oraria` = fasce di 30 minuti dell'ora di ingresso, a partire dalle 09:35;
+   - `lato` = superiore o inferiore;
+   - errori standard clusterizzati per giorno.
+
+   Il coefficiente di `vero` deve avere |t| > 3 e lo **stesso segno** della regressione semplice. Il p corretto con Holm resta quello della regressione semplice.
+2. **Primo attraversamento reale.** Un livello è ammesso solo se **nessuna barra 09:30–09:34** l'ha già raggiunto (high ≥ U oppure low ≤ D). Per i livelli PD vale in più che **nessuna barra pre-market 04:00–09:29** deve averlo già raggiunto: su ES quel livello sarebbe già stato attraversato nella notte. Ai livelli PM questa condizione non si applica, perché il pre-market li tocca per costruzione.
+3. **Regola dello stesso segno, lettura severa.** Una combinazione (famiglia, H) sopravvive solo se supera i criteri su **entrambi** gli strumenti, con lo stesso segno.
+4. **Stadio 2.**
+   - Il P&L giornaliero si calcola sui soli giorni di borsa validi della famiglia, non sui giorni lavorativi di calendario.
+   - Le metriche per trade sono calcolate per singolo trade.
+   - Il criterio "batte il placebo" è automaticamente vero dopo lo stadio 1 e non conta come evidenza indipendente.
+5. **Definizioni.** "Sweep" = un close di una barra **successiva** a quella d'ingresso, entro H minuti, torna dalla parte opposta del livello. Un giorno senza barre pre-market perde solo i livelli PM, non quelli PD.
