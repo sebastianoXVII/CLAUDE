@@ -151,3 +151,13 @@ def test_short_orb():
     b = day({"09:30": (100, 100.5, 99.5, 99.8), "09:34": (99.8, 99.9, 99.2, 99.3)})
     t = E.orb(b)
     assert t["side"] == -1 and t["stop"] == 100.5
+
+
+# ---------- T5: H5a continuazione dal VWAP (specchio esatto di C3) ----------
+
+def test_vwap_continuation_is_exact_mirror_of_magnet():
+    b = day({"09:40": (100, 100, 100, 100, 1000.0), "10:05": (100.5, 100.5, 100.4, 100.4)})
+    m, c = E.vwap_magnet(b), E.vwap_continuation(b)
+    assert c["side"] == -m["side"] and c["p_in"] == m["p_in"] and c["start"] == m["start"]
+    assert c["stop"] == pytest.approx(m["target"]) and c["target"] is None
+    assert E.vwap_continuation(day()) is None

@@ -105,3 +105,11 @@ def fvg(b: pd.DataFrame) -> dict | None:
         risk = abs(entry - stop)
         return _trade(side, entry, stop, entry + side * 2 * risk, ts.strftime("%H:%M"), entry_bar_stop=True)
     return None
+
+
+def vwap_continuation(b: pd.DataFrame) -> dict | None:
+    """T5 H5a: specchio di C3. Stessa deviazione e stesso ingresso, direzione lontano dal VWAP, stop sul VWAP, nessun target."""
+    m = vwap_magnet(b)
+    if m is None:
+        return None
+    return _trade(-m["side"], m["p_in"], m["target"], None, m["start"])

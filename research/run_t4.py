@@ -19,7 +19,15 @@ IS = ("2017-01-01", "2023-12-31")
 CONCEPTS = ("C1_ORB", "C2_gap", "C3_VWAP", "C4_FVG")
 
 
-def trades_for(sym: str, k: float) -> pd.DataFrame:
+DEFAULT_SIGNALS = {
+    "C1_ORB": lambda g, pc: E.orb(g),
+    "C2_gap": lambda g, pc: E.gap_fill(g, pc) if pc else None,
+    "C3_VWAP": lambda g, pc: E.vwap_magnet(g),
+    "C4_FVG": lambda g, pc: E.fvg(g),
+}
+
+
+def trades_for(sym: str, k: float, signals: dict | None = None) -> pd.DataFrame:
     raw = pd.read_parquet(BARS / f"{sym}_1m_raw.parquet")
     raw.index = raw.index.tz_convert(E.TZ)
     rth = raw.between_time("09:30", "15:59")
@@ -30,8 +38,7 @@ def trades_for(sym: str, k: float) -> pd.DataFrame:
             prev_close = None  # emendamento 2: il giorno dopo una sessione scartata C2 non opera
             skipped.append(ts)
             continue
-        specs = {"C1_ORB": E.orb(g), "C2_gap": E.gap_fill(g, prev_close) if prev_close else None,
-                 "C3_VWAP": E.vwap_magnet(g), "C4_FVG": E.fvg(g)}
+        specs = {name: fn(g, prev_close) for name, fn in (signals or DEFAULT_SIGNALS).items()}
         for c, t in specs.items():
             if t is None:
                 rows.append({"date": ts, "concept": c, "traded": False, "gross_pts": 0.0, "reason": None})
