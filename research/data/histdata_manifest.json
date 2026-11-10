@@ -1,0 +1,387 @@
+{
+ "nsxusd": [
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2010.zip",
+   "id": "1sZzgd3Nw16AXTMP_LYZUrBzBpqbXUSZy",
+   "size": 317711
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2011.zip",
+   "id": "19Lcj1R0Jd43tsyv_tAdLK4HGP7f7rn5q",
+   "size": 2683933
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2012.zip",
+   "id": "1cyV6b6Ra9UGHjxl0BaZ9hlQEdzo6hAFX",
+   "size": 2613631
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2013.zip",
+   "id": "1kAHOYlvj-FpVKEiklCUn8U3jQupuIYI_",
+   "size": 2521561
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2014.zip",
+   "id": "1LcXvc7fuJS70LdTzn-BA42-M5F8zhBnb",
+   "size": 2714257
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2015.zip",
+   "id": "10j8_a2lOnVQl25hE3bTqA_iX7Y2InsnD",
+   "size": 3173641
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2016.zip",
+   "id": "169GZejvs-Tu37QdDfJRT361xYGBPr3dC",
+   "size": 3142300
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2017.zip",
+   "id": "1K5DOjKfIiAPHx6AeHYXsADr2wgdQ-s47",
+   "size": 3005614
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2018.zip",
+   "id": "1EJ7CCFdSWcOHKqCB-qLjlzL6tBd_cHlg",
+   "size": 3560115
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2019.zip",
+   "id": "1CrtSova9TejbIZaQTOoKJc1Wmv0M7SdT",
+   "size": 3929822
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2020.zip",
+   "id": "1p9Hr0pNhsC4HqXCcogmeEESlevgygGKS",
+   "size": 4782514
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2021.zip",
+   "id": "1OaUsDBSCVM1ssdQBY4VP6Yhk2S0Wyysj",
+   "size": 4941583
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2022.zip",
+   "id": "1IKCPnI0kffRqxWBC1CcDy7oaZgWcK9af",
+   "size": 5127487
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2023.zip",
+   "id": "1tn_gTKFP7U5DD0JJNGFZWz8sxXS1HKhT",
+   "size": 4285675
+  },
+  {
+   "title": "DAT_ASCII_NSXUSD_M1_2024.zip",
+   "id": "1FoBd6AA53LVsye5HCDMaqZTrnZ_opNRm",
+   "size": 5195055
+  }
+ ],
+ "spxusd": [
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2010.zip",
+   "id": "1T-hH8tNgQ3uDtZDJyPRjI7qChUm38SJD",
+   "size": 261120
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2011.zip",
+   "id": "1vN8AxuoXzuWD1Rl6xuqRJjZwfHVjwkaL",
+   "size": 2339255
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2012.zip",
+   "id": "15km4TKK-Dga1-qy6s9flvPHPqhzm0zro",
+   "size": 2179331
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2013.zip",
+   "id": "1QprTeLlcxWGihv97pdSN7dDZwmOLUgZU",
+   "size": 2062316
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2014.zip",
+   "id": "1nhsMC19KRrArfqw4IVNRckxLOfgsx0_o",
+   "size": 2064317
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2015.zip",
+   "id": "1fZ9jykxLuZgvN9G4DXG4rFyK2hQgn8yb",
+   "size": 2329031
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2016.zip",
+   "id": "1RJLx4OfNwvE2C_rywQ6L35NX6zUQazqP",
+   "size": 2311662
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2017.zip",
+   "id": "1NKocF5aDTPDwX8EeXoV3P7XxsHhHl6zz",
+   "size": 2072451
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2018.zip",
+   "id": "1CqErtsHvcpQh-2LcDypujxq65qZUGotH",
+   "size": 2724034
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2019.zip",
+   "id": "1nXC9bJk3OF2G-ZPOa1fKSW4f9yOYzVG8",
+   "size": 2795335
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2020.zip",
+   "id": "1ldIu4jPdtw9OadLU-n7u2XJhZXO5mJMl",
+   "size": 4048280
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2021.zip",
+   "id": "1mLeJUZJkQplCVJNAmwKafAfbPe6tx-cF",
+   "size": 3997784
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2022.zip",
+   "id": "1zruCZZ0zlZu4qSPWiYCCDZc5neEaly2V",
+   "size": 4512711
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2023.zip",
+   "id": "1UDds9FlZrE_vmgpF3NvgQS4s0Lz6flpk",
+   "size": 3991111
+  },
+  {
+   "title": "DAT_ASCII_SPXUSD_M1_2024.zip",
+   "id": "1g4MOrrQ5KCeEGenCQ87OPFCgPHfEWZ2J",
+   "size": 4570331
+  }
+ ],
+ "eurusd": [
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2010.zip",
+   "id": "1pfh8ETNYy2qccKwxWK2z4Rc0leNUbzMV",
+   "size": 2588154
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2011.zip",
+   "id": "1igo3IuAVCApq0kExVWI57ZpOZGRwiC1W",
+   "size": 2688141
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2012.zip",
+   "id": "1vd-POZW8JCTdB9X2_0NJRjGIY_sU_3oq",
+   "size": 3546484
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2013.zip",
+   "id": "1cv63enRUOFeFZURcF3Md1n2J7tFoBBU2",
+   "size": 3426387
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2014.zip",
+   "id": "1xTqwTQH8b_RCTslhS4ibXXD1GmHeV6Qe",
+   "size": 3272255
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2015.zip",
+   "id": "1m01rAWLILEbvqp98o68eSraMO3MWhT5w",
+   "size": 3558222
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2016.zip",
+   "id": "1MQzOc7LTgF5WXRWDD3arXEXOJiBUjNd1",
+   "size": 3442178
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2017.zip",
+   "id": "12rPN_QySvP290109payFINXi8o1bIdhN",
+   "size": 3365476
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2018.zip",
+   "id": "1SXzLUDAJkCvxmsNN55fJ-rNWim4NK4IF",
+   "size": 3433859
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2019.zip",
+   "id": "1TjJFUroV5cPsHlqQu2Li0sVZrbLDFfXW",
+   "size": 3156192
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2020.zip",
+   "id": "1DuECjEkv5gjoLd4Pv0_HO4lixvs3juow",
+   "size": 3420002
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2021.zip",
+   "id": "1Cw9oGBmVzr5BB6LSjuwgtkOKEOia3LiE",
+   "size": 3285118
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2022.zip",
+   "id": "1bN4444OxuknvByX5xh75_1ebLfQ5hooJ",
+   "size": 3545446
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2023.zip",
+   "id": "1iuMa_fEHk_N4L0Ed7bKzhi6ll4Mr2YM5",
+   "size": 2919186
+  },
+  {
+   "title": "DAT_ASCII_EURUSD_M1_2024.zip",
+   "id": "1LPLuqzAKDfJPTBpXU5zfEsvcq9UEYVRu",
+   "size": 3229550
+  }
+ ],
+ "gbpusd": [
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2010.zip",
+   "id": "1Kdih3Y5I5tHMk0sOCJGbpnqswQlFgf-5",
+   "size": 2619039
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2011.zip",
+   "id": "11dZbDuCArBeRcrjZ2EUoEirARpFr9U-x",
+   "size": 2661811
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2012.zip",
+   "id": "1MdHNVcT43aczoLVuHdQbRQc36Rvf3KSc",
+   "size": 3501105
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2013.zip",
+   "id": "1YIohy3lB8eK-dBwBPCd91jtsw7IRhcUg",
+   "size": 3489013
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2014.zip",
+   "id": "168YxucLJghod-EIPinT_Qw2HtXz5KBXu",
+   "size": 3357884
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2015.zip",
+   "id": "1_prv1BvtnfntqsyjpZbkcmqyVyDVFRmZ",
+   "size": 3535353
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2016.zip",
+   "id": "1-xZccod16a9my2-jgfajPUSmI2YI01DM",
+   "size": 3627916
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2017.zip",
+   "id": "13sZGdCP7D38LYzaI1SGY2Pe53l5FV3VM",
+   "size": 3431978
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2018.zip",
+   "id": "1Ww6nH94nbmVNNUWjTrIg1EjzdI9tXATx",
+   "size": 3503386
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2019.zip",
+   "id": "1EIXMCiIV88LcyqRjzgZemscC4ZTDYLfJ",
+   "size": 3411684
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2020.zip",
+   "id": "14068KPZGXvrd301lS7CSgY6NrPChNpGD",
+   "size": 3625339
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2021.zip",
+   "id": "13WkjjEBMj9iu-eF_6iQF-VEIWtJ4NI2R",
+   "size": 3447415
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2022.zip",
+   "id": "1OZqfyRtveQV6VU6x7hxGTnYPKvUtLbZI",
+   "size": 3670216
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2023.zip",
+   "id": "1bMQXEYzYLU-hOc-K4_Fob49arF7HZA8g",
+   "size": 3049553
+  },
+  {
+   "title": "DAT_ASCII_GBPUSD_M1_2024.zip",
+   "id": "1gj4nFpkLp9Gck73sq50LSvPRhLndvcq4",
+   "size": 3375781
+  }
+ ],
+ "xauusd": [
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2010.zip",
+   "id": "1Byn-jhwK8zaP8RiGC-Igz7aqn5X6VUrw",
+   "size": 3414721
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2011.zip",
+   "id": "1T3cuM-rLwaQKTz0Jk2MhEfdW6uXhm8_m",
+   "size": 3595889
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2012.zip",
+   "id": "1meRFToF_FiJqvBXcoy7UrBNAJDbwXMNX",
+   "size": 3999995
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2013.zip",
+   "id": "17mOSasCdy8aAsTJkvEAUMPXT7TBQeudC",
+   "size": 4012416
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2014.zip",
+   "id": "1Z8xwWROc8N867FGkLria_qn-9TIpn8Gd",
+   "size": 3771386
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2015.zip",
+   "id": "1Ijp-eWrrGzpFm3FPOqDczYzKlOtYoqlT",
+   "size": 3759516
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2016.zip",
+   "id": "1AggFPCnV3cgdHYxjzvpWiLImJGJ70_2b",
+   "size": 3917648
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2017.zip",
+   "id": "1VTLuWLWEZP2EXNb9Svx6_Cc7dHJXJnVC",
+   "size": 3695379
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2018.zip",
+   "id": "1e2aMI6XlWJ9L3fOBQnbTlTvHeEL-iWyo",
+   "size": 3634784
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2019.zip",
+   "id": "1Lpqd5cysrCbtU4Zo7KTFcSjCgO9LP2uw",
+   "size": 3848654
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2020.zip",
+   "id": "1KJdGHm8NZCeNRLeEthTma_5YTWQKZq_5",
+   "size": 4317930
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2021.zip",
+   "id": "1h4YE6N8NPifmhqWLmR9E2z56yQYYOxX4",
+   "size": 4252073
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2022.zip",
+   "id": "1vYvuh5tAefx155HcT0Eb0OY95QC6xTi1",
+   "size": 4364035
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2023.zip",
+   "id": "1w9Lj-zKzSakwsFGw7mIE1ebTHSuVarUw",
+   "size": 3629564
+  },
+  {
+   "title": "DAT_ASCII_XAUUSD_M1_2024.zip",
+   "id": "1NTQy5KALOz-R5-bltPbV9mNCEgz9sC0Z",
+   "size": 4358732
+  }
+ ]
+}

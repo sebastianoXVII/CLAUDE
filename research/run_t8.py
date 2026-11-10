@@ -1,7 +1,7 @@
 """Esegue T8 (concetti di sessione) secondo research/preregistration/T8_sessioni_liquidita.md.
     python3 research/run_t8.py              # in-sample (inizio dati -> 2023-12-31), salva il verdetto
     python3 research/run_t8.py --holdout    # hold-out 2024+, SOLO per i sopravvissuti in-sample
-Dati attesi: data/bars/NAS100_USD_M1_oanda.parquet (e SPX500_USD_M1_oanda.parquet, solo riportato)."""
+Dati attesi: data/bars/NSXUSD_1m_24h.parquet (e SPXUSD_1m_24h.parquet, solo riportato): HistData, emendamento 4."""
 from __future__ import annotations
 
 import json
@@ -19,7 +19,7 @@ from lab import charts, journal, pathstats  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 BARS, OUT = ROOT / "data" / "bars", ROOT / "research" / "results"
 CHARTS = ROOT / "data" / "charts" / "T8"
-INSTR = {"NQ": ("USATECHIDXUSD", 20.0, 0.45), "ES": ("USA500IDXUSD", 50.0, 0.5)}  # emendamento 3: Dukascopy  # file, $/pt pieno, costo DECISIONALE pt (emend. 2)
+INSTR = {"NQ": ("NSXUSD", 20.0, 0.45), "ES": ("SPXUSD", 50.0, 0.5)}  # emendamento 4: HistData  # file, $/pt pieno, costo DECISIONALE pt (emend. 2)
 COST_MNQ, COST_CFD = 0.85, 2.0  # controllo MNQ (decisionale per NQ) e CFD (solo riportato)
 IS_END, HO_START = "2023-12-31", "2024-01-01"
 HYP = ("H8a", "H8b", "H8c", "H8d", "H8e")

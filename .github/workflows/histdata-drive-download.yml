@@ -1,0 +1,50 @@
+# Scarica gli zip HistData M1 dalla copia pubblica su Google Drive (progetto philipperemy/FX-1-Minute-Data),
+# li converte in parquet UTC e li pubblica nel branch separato `data-histdata`. ID dei file: research/data/histdata_manifest.json
+name: histdata-drive-download
+on:
+  workflow_dispatch:
+    inputs:
+      instruments:
+        description: "Strumenti separati da spazio"
+        default: "nsxusd spxusd eurusd gbpusd xauusd"
+        required: true
+permissions:
+  contents: write
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas==2.2.3 pyarrow==18.1.0
+      - name: Download e conversione
+        run: |
+          set -euo pipefail
+          mkdir -p zips out
+          for INS in ${{ inputs.instruments }}; do
+            python -c "import json;[print(e['id'],e['title']) for e in json.load(open('research/data/histdata_manifest.json'))['$INS']]" > list.txt
+            files=()
+            while read -r ID TITLE; do
+              for i in 1 2 3 4; do
+                curl -fsSL "https://drive.usercontent.google.com/download?id=${ID}&export=download&confirm=t" -o "zips/$TITLE" && unzip -tq "zips/$TITLE" >/dev/null && break
+                echo "ritento $TITLE ($i)"; sleep $((i*5))
+              done
+              unzip -tq "zips/$TITLE" >/dev/null || { echo "zip non valido: $TITLE"; exit 1; }
+              files+=("zips/$TITLE")
+            done < list.txt
+            SYM=$(echo "$INS" | tr a-z A-Z)
+            python research/data/histdata.py "out/${SYM}_1m_24h.parquet" "${files[@]}"
+          done
+          ls -la out
+      - name: Pubblica nel branch data-histdata
+        run: |
+          git config user.name "histdata-bot"; git config user.email "histdata-bot@users.noreply.github.com"
+          cp out/*.parquet /tmp/
+          git fetch origin data-histdata 2>/dev/null && git checkout -f -B data-histdata origin/data-histdata || git checkout -f --orphan data-histdata
+          git rm -rq --cached . 2>/dev/null || true
+          mkdir -p histdata && cp /tmp/*_1m_24h.parquet histdata/
+          git add histdata/ && git commit -qm "HistData M1 ${{ inputs.instruments }}" || exit 0
+          git push origin data-histdata
