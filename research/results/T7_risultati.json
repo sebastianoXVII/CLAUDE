@@ -1,0 +1,54 @@
+{
+  "giorni": 1479,
+  "trade": 891,
+  "win_rate": 0.4118967452300786,
+  "payoff": 1.6239635287255567,
+  "expectancy_pt_per_trade": 0.831582491582498,
+  "expectancy_usd_per_trade": 16.63164983164996,
+  "profit_factor": 1.1373943035158003,
+  "sharpe_ann": 0.5496608798371448,
+  "sortino_ann": 0.9301873606965452,
+  "max_dd_usd": -6340.399999999983,
+  "pnl_tot_usd": 14818.80000000012,
+  "t_nw": 1.3516767450629092,
+  "p_unilaterale": 0.0882393737480307,
+  "n_trades": 1275,
+  "trade_win_rate": 0.36470588235294116,
+  "gross_pt_per_trade": 1.0311294117647105,
+  "net_usd_per_trade": 11.622588235294206,
+  "stress2x_media_pt": 0.11304259634888857,
+  "uscite": {
+    "stop": 0.652,
+    "close": 0.345,
+    "reversal": 0.003
+  },
+  "pnl_pt_per_anno": {
+    "2010": -26.6,
+    "2011": 151.9,
+    "2012": 283.8,
+    "2013": -4.7,
+    "2014": 206.0,
+    "2015": 208.4,
+    "2016": -77.8
+  },
+  "media_pt_costo_MNQ": 0.15614604462475032,
+  "pnl_pt_per_anno_accorpati": {
+    "2011": 125.3,
+    "2012": 283.8,
+    "2013": -4.7,
+    "2014": 206.0,
+    "2015": 208.4,
+    "2016": -77.8
+  },
+  "criteri": {
+    "t>3": false,
+    "stress2x>0": true,
+    "MNQ>0": true,
+    "anni>=2/3": true
+  },
+  "SOPRAVVIVE": false,
+  "ESITO": "INCONCLUSIVO",
+  "periodo": "2010-12-07 -> 2016-12-30",
+  "n_giorni": 1479,
+  "diagnostico_corr_giornaliera_NSXUSD_vs_QQQ": 0.973363265609355
+}
