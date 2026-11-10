@@ -1,0 +1,170 @@
+{
+  "storico_2017_2026|1MNQ": {
+    "p_pass": 0.1505,
+    "p_fail": 0.0705,
+    "p_open": 0.779,
+    "median_days_pass": 91.5,
+    "median_days_fail": 79.0
+  },
+  "storico_2017_2026|2MNQ": {
+    "p_pass": 0.42525,
+    "p_fail": 0.403,
+    "p_open": 0.17175,
+    "median_days_pass": 67.0,
+    "median_days_fail": 48.0
+  },
+  "storico_2017_2026|3MNQ": {
+    "p_pass": 0.423,
+    "p_fail": 0.5515,
+    "p_open": 0.0255,
+    "median_days_pass": 43.5,
+    "median_days_fail": 28.0
+  },
+  "storico_2017_2026|4MNQ": {
+    "p_pass": 0.36625,
+    "p_fail": 0.623,
+    "p_open": 0.01075,
+    "median_days_pass": 32.0,
+    "median_days_fail": 19.0
+  },
+  "storico_2017_2026|5MNQ": {
+    "p_pass": 0.33525,
+    "p_fail": 0.659,
+    "p_open": 0.00575,
+    "median_days_pass": 25.0,
+    "median_days_fail": 15.0
+  },
+  "storico_2017_2026|6MNQ": {
+    "p_pass": 0.30925,
+    "p_fail": 0.68625,
+    "p_open": 0.0045,
+    "median_days_pass": 21.0,
+    "median_days_fail": 12.0
+  },
+  "storico_2017_2026|8MNQ": {
+    "p_pass": 0.2655,
+    "p_fail": 0.73125,
+    "p_open": 0.00325,
+    "median_days_pass": 17.0,
+    "median_days_fail": 9.0
+  },
+  "storico_2017_2026|10MNQ": {
+    "p_pass": 0.23625,
+    "p_fail": 0.76075,
+    "p_open": 0.003,
+    "median_days_pass": 15.0,
+    "median_days_fail": 7.0
+  },
+  "aspettativa_dimezzata|1MNQ": {
+    "p_pass": 0.0745,
+    "p_fail": 0.14725,
+    "p_open": 0.77825,
+    "median_days_pass": 89.5,
+    "median_days_fail": 82.0
+  },
+  "aspettativa_dimezzata|2MNQ": {
+    "p_pass": 0.254,
+    "p_fail": 0.57375,
+    "p_open": 0.17225,
+    "median_days_pass": 68.0,
+    "median_days_fail": 48.0
+  },
+  "aspettativa_dimezzata|3MNQ": {
+    "p_pass": 0.272,
+    "p_fail": 0.696,
+    "p_open": 0.032,
+    "median_days_pass": 44.0,
+    "median_days_fail": 28.0
+  },
+  "aspettativa_dimezzata|4MNQ": {
+    "p_pass": 0.244,
+    "p_fail": 0.74325,
+    "p_open": 0.01275,
+    "median_days_pass": 31.0,
+    "median_days_fail": 19.0
+  },
+  "aspettativa_dimezzata|5MNQ": {
+    "p_pass": 0.22175,
+    "p_fail": 0.76975,
+    "p_open": 0.0085,
+    "median_days_pass": 23.0,
+    "median_days_fail": 15.0
+  },
+  "aspettativa_dimezzata|6MNQ": {
+    "p_pass": 0.2085,
+    "p_fail": 0.78525,
+    "p_open": 0.00625,
+    "median_days_pass": 20.0,
+    "median_days_fail": 12.0
+  },
+  "aspettativa_dimezzata|8MNQ": {
+    "p_pass": 0.18,
+    "p_fail": 0.81575,
+    "p_open": 0.00425,
+    "median_days_pass": 16.5,
+    "median_days_fail": 9.0
+  },
+  "aspettativa_dimezzata|10MNQ": {
+    "p_pass": 0.1605,
+    "p_fail": 0.8355,
+    "p_open": 0.004,
+    "median_days_pass": 15.0,
+    "median_days_fail": 7.0
+  },
+  "solo_OOS_2025_2026|1MNQ": {
+    "p_pass": 0.3395,
+    "p_fail": 0.357,
+    "p_open": 0.3035,
+    "median_days_pass": 70.5,
+    "median_days_fail": 59.0
+  },
+  "solo_OOS_2025_2026|2MNQ": {
+    "p_pass": 0.32225,
+    "p_fail": 0.64125,
+    "p_open": 0.0365,
+    "median_days_pass": 36.0,
+    "median_days_fail": 24.0
+  },
+  "solo_OOS_2025_2026|3MNQ": {
+    "p_pass": 0.24325,
+    "p_fail": 0.74825,
+    "p_open": 0.0085,
+    "median_days_pass": 22.0,
+    "median_days_fail": 13.0
+  },
+  "solo_OOS_2025_2026|4MNQ": {
+    "p_pass": 0.2115,
+    "p_fail": 0.78325,
+    "p_open": 0.00525,
+    "median_days_pass": 15.0,
+    "median_days_fail": 9.0
+  },
+  "solo_OOS_2025_2026|5MNQ": {
+    "p_pass": 0.2015,
+    "p_fail": 0.7945,
+    "p_open": 0.004,
+    "median_days_pass": 13.0,
+    "median_days_fail": 7.0
+  },
+  "solo_OOS_2025_2026|6MNQ": {
+    "p_pass": 0.184,
+    "p_fail": 0.81275,
+    "p_open": 0.00325,
+    "median_days_pass": 12.0,
+    "median_days_fail": 6.0
+  },
+  "solo_OOS_2025_2026|8MNQ": {
+    "p_pass": 0.1665,
+    "p_fail": 0.831,
+    "p_open": 0.0025,
+    "median_days_pass": 11.0,
+    "median_days_fail": 5.0
+  },
+  "solo_OOS_2025_2026|10MNQ": {
+    "p_pass": 0.149,
+    "p_fail": 0.84875,
+    "p_open": 0.00225,
+    "median_days_pass": 10.0,
+    "median_days_fail": 4.0
+  }
+}

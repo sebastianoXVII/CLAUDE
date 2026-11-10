@@ -1,0 +1,51 @@
+"""Test del simulatore di challenge prop (regole Topstep 50K verificate 2026-11-10 su help.topstep.com). Scritti prima del codice."""
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from lab import prop_sim as P  # noqa: E402
+
+R = P.Rules(start=50_000, target=3_000, mll=2_000, consistency=0.55)
+
+
+def test_pass_when_target_reached_without_big_single_day():
+    days = [(1000, 0), (1000, 0), (1100, 0)]  # (P&L del giorno, minimo intraday del P&L del giorno)
+    r = P.run_challenge(days, R)
+    assert r["outcome"] == "pass" and r["days"] == 3
+
+
+def test_consistency_raises_target_after_big_day():
+    # giorno migliore 2000 > 55% di 3000 -> il target diventa 2000/0.55 = 3636.4
+    days = [(2000, 0), (1200, 0), (500, 0)]
+    r = P.run_challenge(days, R)
+    assert r["outcome"] == "pass" and r["days"] == 3
+    assert P.run_challenge(days[:2], R)["outcome"] == "open"  # 3200 < 3636: non ancora passato
+
+
+def test_fail_on_intraday_breach_even_if_day_closes_positive():
+    days = [(500, 0), (100, -2600)]  # MLL a 48.500 dopo il giorno 1; intraday 50.500-2.600 = 47.900 -> violato
+    r = P.run_challenge(days, R)
+    assert r["outcome"] == "fail" and r["days"] == 2
+
+
+def test_mll_trails_on_eod_high_and_stops_at_start_balance():
+    # dopo +2.500 il MLL sale fino a 50.000 e si ferma: un crollo a 50.100 non viola, a 49.900 si'
+    assert P.run_challenge([(2500, 0), (0, -2400)], R)["outcome"] == "open"
+    assert P.run_challenge([(2500, 0), (0, -2600)], R)["outcome"] == "fail"
+
+
+def test_monte_carlo_returns_probabilities_that_sum_to_one():
+    rng = np.random.default_rng(0)
+    pool = [(float(x), float(min(0, x) - 50)) for x in rng.normal(30, 400, 500)]
+    out = P.monte_carlo(pool, R, n_sims=400, max_days=120, block=5, seed=1)
+    assert out["p_pass"] + out["p_fail"] + out["p_open"] == pytest.approx(1.0)
+    assert 0 <= out["p_pass"] <= 1 and out["median_days_pass"] > 0
+
+
+def test_scaling_multiplies_pnl_and_intraday_min():
+    pool = [(100.0, -50.0)]
+    scaled = P.scale(pool, 3)
+    assert scaled == [(300.0, -150.0)]
