@@ -1,0 +1,122 @@
+{
+  "ES_H5a_VWAP_cont": {
+    "giorni": 710,
+    "trade": 480,
+    "win_rate": 0.38125,
+    "payoff": 1.5929380185526767,
+    "expectancy_pt_per_trade": -0.20409655876537675,
+    "expectancy_usd_per_trade": -10.204827938268837,
+    "profit_factor": 0.9815072639566998,
+    "sharpe_ann": -0.08883312836012981,
+    "sortino_ann": -0.1723472242255196,
+    "max_dd_usd": -25419.642612425105,
+    "pnl_tot_usd": -4898.317410369051,
+    "t_nw": -0.15934084572097512,
+    "p_unilaterale": 0.5632998292034812,
+    "periodo": "2024-01-02 -> 2026-11-06",
+    "gross_pt_per_trade": 0.12590344123462197,
+    "stress2x_media_pt": -0.36107936367236776,
+    "uscite": {
+      "time": 0.527,
+      "stop": 0.473
+    },
+    "pnl_pt_per_anno": {
+      "2024": 187.1,
+      "2025": -126.4,
+      "2026": -158.7
+    },
+    "p_holm": 1.0,
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "ES_H5b_ORB": {
+    "giorni": 710,
+    "trade": 707,
+    "win_rate": 0.18953323903818953,
+    "payoff": 4.084098240880885,
+    "expectancy_pt_per_trade": -0.3147906647807586,
+    "expectancy_usd_per_trade": -15.73953323903793,
+    "profit_factor": 0.955094527535844,
+    "sharpe_ann": -0.22414256657933435,
+    "sortino_ann": -0.55236496575494,
+    "max_dd_usd": -35667.34999999985,
+    "pnl_tot_usd": -11127.849999999835,
+    "t_nw": -0.3823080833532155,
+    "p_unilaterale": 0.648883570190781,
+    "periodo": "2024-01-02 -> 2026-11-06",
+    "gross_pt_per_trade": 0.015209335219240611,
+    "stress2x_media_pt": -0.6420661971830932,
+    "uscite": {
+      "stop": 0.802,
+      "time": 0.198
+    },
+    "pnl_pt_per_anno": {
+      "2024": -360.5,
+      "2025": -34.2,
+      "2026": 172.1
+    },
+    "p_holm": 1.0,
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "NQ_H5a_VWAP_cont": {
+    "giorni": 710,
+    "trade": 623,
+    "win_rate": 0.3451043338683788,
+    "payoff": 1.7515231317299933,
+    "expectancy_pt_per_trade": -3.8504309233685987,
+    "expectancy_usd_per_trade": -77.00861846737197,
+    "profit_factor": 0.92298400324007,
+    "sharpe_ann": -0.4588024673230887,
+    "sortino_ann": -0.8539653892191835,
+    "max_dd_usd": -96010.71846310292,
+    "pnl_tot_usd": -47976.36930517274,
+    "t_nw": -0.8555093914824304,
+    "p_unilaterale": 0.8038653962532355,
+    "periodo": "2024-01-02 -> 2026-11-06",
+    "gross_pt_per_trade": -3.4004309233685994,
+    "stress2x_media_pt": -3.773476711631884,
+    "uscite": {
+      "stop": 0.571,
+      "time": 0.429
+    },
+    "pnl_pt_per_anno": {
+      "2024": 674.2,
+      "2025": -1841.2,
+      "2026": -1231.7
+    },
+    "p_holm": 1.0,
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  },
+  "NQ_H5b_ORB": {
+    "giorni": 710,
+    "trade": 707,
+    "win_rate": 0.2545968882602546,
+    "payoff": 3.353607460989241,
+    "expectancy_pt_per_trade": 5.801490947666289,
+    "expectancy_usd_per_trade": 116.02981895332577,
+    "profit_factor": 1.1454446735826629,
+    "sharpe_ann": 0.6376751690291572,
+    "sortino_ann": 1.6876552872272619,
+    "max_dd_usd": -47766.97399999924,
+    "pnl_tot_usd": 82033.08200000133,
+    "t_nw": 1.1973505021881128,
+    "p_unilaterale": 0.11558498390645944,
+    "periodo": "2024-01-02 -> 2026-11-06",
+    "gross_pt_per_trade": 6.251490947666287,
+    "stress2x_media_pt": 5.328879014084599,
+    "uscite": {
+      "stop": 0.738,
+      "time": 0.262
+    },
+    "pnl_pt_per_anno": {
+      "2024": 1745.3,
+      "2025": 2383.8,
+      "2026": -27.5
+    },
+    "p_holm": 0.46233993562583775,
+    "passa_singolo": false,
+    "SOPRAVVIVE": false
+  }
+}
