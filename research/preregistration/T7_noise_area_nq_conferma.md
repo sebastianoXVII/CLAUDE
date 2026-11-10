@@ -56,3 +56,12 @@ Se il proxy fallisce, T7 **non si esegue** su HistData. Resta in attesa di dati 
 **Periodo di test.** Dal primo giorno operativo (servono 14 giorni di riscaldamento per σ e un close precedente valido) al **2016-12-31**, cioè circa 6 anni e circa 1.500 giorni. **Potenza:** con Sharpe 1,2 il t atteso è circa 2,9. Restano i tre esiti dell'emendamento 1: **CONFERMATO** (tutti i criteri della sezione 5), **INCONCLUSIVO** (0 ≤ t ≤ 3, oppure t > 3 senza gli altri criteri) e **MORTO** (t < 0).
 
 **Resto invariato:** regole T6 (emendamenti 1–2), nessun dividendo (indice CFD), costi NQ 0,45 punti, MNQ 0,85, stress 2×, prezzi in punti indice (k = 1, 20 $ a punto). Inclusione del giorno: almeno 300 barre RTH, esclusione di weekend e chiusure anticipate NYSE. Diagnostico non decisionale: correlazione del P&L giornaliero NSXUSD con QQQ×41 sul 2017–2024. Esecuzione unica, con un file di guardia.
+
+## Emendamento 3 — 2026-11-10, dalla code review, registrato PRIMA di qualsiasi esecuzione (né proxy né test)
+1. **Festivi.** HistData ha barre parziali anche nei festivi NYSE (MLK, Thanksgiving, ecc.). I giorni che **non sono sessioni NYSE** (calendario XNYS) si saltano **senza interrompere** la catena del close precedente, come accade in T6, dove i festivi non hanno barre. Il giorno dopo un festivo usa quindi il P(16:00) dell'ultima sessione valida, come prevede la §3. Le chiusure anticipate restano escluse e interrompono la catena, come in T6.
+2. **Criterio degli anni (§5.3).** Un anno solare con meno di 60 giorni di test si accorpa all'anno successivo: in pratica il 2010, che inizia a dicembre, si somma al 2011. Il segno di ogni anno si valuta sulla somma non arrotondata.
+3. **Diagnostici non vincolanti della validazione del proxy**, che non cambiano le soglie:
+   - accordo calcolato solo sui giorni con almeno un trade in una delle due versioni;
+   - prova "fuori tempo": profilo costruito sul 2021–2024, poi accordo e correlazione misurati sul 2017–2019.
+4. **Integrità.** Il file della validazione contiene l'hash del profilo usato. `run_t7` verifica che sia identico a quello che ricalcola. Si salvano anche la lista dei trade (`T7_trades.parquet`) e, in un secondo passaggio, il diario con gli screenshot.
+5. **Diagnostico NSXUSD contro QQQ:** correlazione del P&L giornaliero sui giorni operativi comuni del 2017–2024, con zero nei giorni senza trade.
