@@ -43,7 +43,30 @@ def prop_descriptives(r: pd.Series) -> dict:
     return {"vol_ann_scalata": float(x.std() * np.sqrt(E.ANN)), "rend_ann_scalato": float(x.mean() * E.ANN),
             "max_dd": float((eq / eq.cummax() - 1).min()), "giorno_peggiore": float(x.min()),
             "quota_giorni_sotto_-2%": float((x < -0.02).mean()), "quota_giorni_sotto_-5%": float((x < -0.05).mean()),
-            "quota_finestre_10g_positive": float((w > 0).mean())}
+            "quota_finestre_10_giorni_borsa_positive": float((w > 0).mean())}
+
+
+def min_end(sym: str, stage: str):
+    """Ultima data minima richiesta (emendamento 1: ETXEUR finisce nel 2019, WTIUSD nel 2023)."""
+    if stage == "insample":
+        return pd.Timestamp("2019-06-30" if sym == "ETXEUR" else "2019-11-30")
+    if sym == "ETXEUR":
+        return None
+    return pd.Timestamp("2023-11-30" if sym == "WTIUSD" else "2024-11-30")
+
+
+def preflight(stage: str) -> None:
+    """Controlli sui file PRIMA del lock: presenza, schema, copertura."""
+    for sym in INSTR:
+        f = DAILY / f"{sym}_1d.parquet"
+        if not f.exists():
+            sys.exit(f"manca il file di {sym} ({f}): nessuno stadio avviato.")
+        d = pd.read_parquet(f)
+        if not {"close", "n_bars"} <= set(d.columns) or not isinstance(d.index, pd.DatetimeIndex) or d.index.tz is not None:
+            sys.exit(f"schema non valido per {sym}: nessuno stadio avviato.")
+        need = min_end(sym, stage)
+        if d.index.min() > pd.Timestamp("2010-12-31") or (need is not None and d.index.max() < need):
+            sys.exit(f"copertura insufficiente per {sym} ({d.index.min().date()} -> {d.index.max().date()}): nessuno stadio avviato.")
 
 
 def load(sym: str, end: str) -> pd.DataFrame:
@@ -92,6 +115,7 @@ def main(argv: list[str]) -> None:
     lock = OUT / f"T15_{stage}.started"
     if lock.exists():
         sys.exit(f"stadio {stage} gia' avviato in passato (lock): non si riesegue.")
+    preflight(stage)
     lock.write_text(pd.Timestamp.now(tz="UTC").isoformat())
     s, e = PERIODS[stage]
     if stage == "insample":

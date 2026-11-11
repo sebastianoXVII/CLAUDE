@@ -33,7 +33,7 @@ def test_prop_descriptives_scale_to_10pct_vol():
     r = pd.Series(np.random.default_rng(0).normal(0.0005, 0.01, 2000), index=pd.bdate_range("2011-01-03", periods=2000))
     d = R.prop_descriptives(r)
     assert np.isclose(d["vol_ann_scalata"], 0.10, atol=1e-9)
-    assert d["max_dd"] < 0 and 0 <= d["quota_finestre_10g_positive"] <= 1
+    assert d["max_dd"] < 0 and 0 <= d["quota_finestre_10_giorni_borsa_positive"] <= 1
 
 
 def _fake(tmp, sym, n=800, start="2010-01-04"):
@@ -54,7 +54,7 @@ def test_stages_guarded(tmp_path, monkeypatch):
     with pytest.raises(SystemExit, match="insample"):
         R.main(["holdout"])
     (tmp_path / "T15_insample.started").write_text("x")
-    with pytest.raises(SystemExit, match="avviato"):
+    with pytest.raises(SystemExit, match="lock"):
         R.main(["insample"])
 
 
@@ -68,3 +68,30 @@ def test_insample_end_to_end_on_synthetic(tmp_path, monkeypatch):
     res = json.loads((tmp_path / "T15_insample.json").read_text())
     assert set(res["varianti"]) == {"V1", "V2"} and "p_holm" in res["varianti"]["V1"]
     assert res["strumenti_usati"] == ["EURUSD", "XAUUSD"]
+
+
+def test_preflight_refuses_missing_files_before_lock(tmp_path, monkeypatch):
+    _fake(tmp_path, "EURUSD", n=2600)
+    monkeypatch.setattr(R, "DAILY", tmp_path)
+    monkeypatch.setattr(R, "OUT", tmp_path)
+    monkeypatch.setattr(R, "INSTR", {"EURUSD": 1e-4, "XAUUSD": 2e-4})
+    with pytest.raises(SystemExit, match="XAUUSD"):
+        R.main(["insample"])
+    assert not (tmp_path / "T15_insample.started").exists()
+
+
+def test_preflight_refuses_short_coverage(tmp_path, monkeypatch):
+    _fake(tmp_path, "EURUSD", n=600)  # finisce nel 2012
+    monkeypatch.setattr(R, "DAILY", tmp_path)
+    monkeypatch.setattr(R, "OUT", tmp_path)
+    monkeypatch.setattr(R, "INSTR", {"EURUSD": 1e-4})
+    with pytest.raises(SystemExit, match="copertura"):
+        R.main(["insample"])
+    assert not (tmp_path / "T15_insample.started").exists()
+
+
+def test_holdout_coverage_exceptions_declared():
+    assert R.min_end("ETXEUR", "holdout") is None
+    assert R.min_end("WTIUSD", "holdout") == pd.Timestamp("2023-11-30")
+    assert R.min_end("EURUSD", "holdout") == pd.Timestamp("2024-11-30")
+    assert R.min_end("ETXEUR", "insample") == pd.Timestamp("2019-06-30")

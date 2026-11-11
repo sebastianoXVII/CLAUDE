@@ -38,7 +38,7 @@ def instrument_pnl(pos: pd.Series, r: pd.Series, cost: float, fin: float) -> pd.
     held = pos.shift(1)
     change = (pos.fillna(0.0) - pos.fillna(0.0).shift(1).fillna(0.0)).abs()
     return pd.DataFrame({"gross": (held * r).fillna(0.0), "tcost": change * cost / 2,
-                         "fcost": held.abs().fillna(0.0) * fin / 252, "avail": held.notna()}, index=pos.index)
+                         "fcost": held.abs().fillna(0.0) * fin / 252, "avail": held.notna() | pos.notna()}, index=pos.index)
 
 
 def portfolio(parts: dict[str, pd.DataFrame], cost_mult: float = 1.0) -> pd.Series:

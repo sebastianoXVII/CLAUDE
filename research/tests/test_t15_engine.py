@@ -72,3 +72,12 @@ def test_instrument_leaves_portfolio_after_its_last_data_day():
     b = pd.DataFrame({"gross": [0.0, 0.03], "tcost": 0.0, "fcost": 0.0, "avail": True}, index=idx[:2])
     p = E.portfolio({"A": a, "B": b})
     assert np.isclose(p.iloc[1], 0.02) and np.isclose(p.iloc[3], 0.01)
+
+
+def test_entry_cost_from_flat_reaches_portfolio():
+    idx = pd.bdate_range("2015-01-01", periods=3)
+    pos = pd.Series([np.nan, 2.0, 2.0], index=idx)
+    r = pd.Series([0.0, 0.0, 0.0], index=idx)
+    part = E.instrument_pnl(pos, r, cost=1e-4, fin=0.0)
+    p = E.portfolio({"A": part})
+    assert np.isclose(p.loc[idx[1]], -2.0 * 1e-4 / 2)
