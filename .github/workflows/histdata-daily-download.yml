@@ -22,29 +22,36 @@ jobs:
       - run: pip install pandas==2.2.3 pyarrow==18.1.0
       - name: Download e conversione
         run: |
-          set -euo pipefail
-          mkdir -p zips out
+          set -uo pipefail
+          mkdir -p zips out; : > failed.txt
           for INS in ${{ inputs.instruments }}; do
             python -c "import json;[print(e['id'],e['title']) for e in json.load(open('research/data/histdata_manifest.json'))['$INS']]" > list.txt
-            files=()
+            files=(); ok=1
             while read -r ID TITLE; do
-              for i in 1 2 3 4; do
-                curl -fsSL "https://drive.usercontent.google.com/download?id=${ID}&export=download&confirm=t" -o "zips/$TITLE" && unzip -tq "zips/$TITLE" >/dev/null && break
-                echo "ritento $TITLE ($i)"; sleep $((i*5))
+              for i in 1 2 3 4 5 6; do
+                curl -sSL "https://drive.usercontent.google.com/download?id=${ID}&export=download&confirm=t" -o "zips/$TITLE" -w "http %{http_code} bytes %{size_download} type %{content_type}\n" && unzip -tq "zips/$TITLE" >/dev/null 2>&1 && break
+                echo "ritento $TITLE ($i); inizio risposta:"; head -c 300 "zips/$TITLE" 2>/dev/null | tr -cd '[:print:]\n' | head -5; echo
+                sleep $((i*30))
               done
-              unzip -tq "zips/$TITLE" >/dev/null || { echo "zip non valido: $TITLE"; exit 1; }
+              if ! unzip -tq "zips/$TITLE" >/dev/null 2>&1; then echo "zip non valido: $TITLE"; ok=0; break; fi
               files+=("zips/$TITLE")
             done < list.txt
             SYM=$(echo "$INS" | tr a-z A-Z)
-            python research/data/histdata_daily.py "out/${SYM}_1d.parquet" "${files[@]}"
+            if [ "$ok" = 1 ] && python research/data/histdata_daily.py "out/${SYM}_1d.parquet" "${files[@]}"; then :; else echo "$INS" >> failed.txt; rm -f "out/${SYM}_1d.parquet"; fi
             rm -f zips/*
           done
-          ls -la out
-      - name: Pubblica nel branch data-histdata
+          ls -la out; echo "falliti:"; cat failed.txt
+      - name: Pubblica nel branch data-histdata (anche se qualche strumento è fallito)
+        if: always()
         run: |
+          ls out/*_1d.parquet >/dev/null 2>&1 || { echo "nessun file da pubblicare"; exit 0; }
           git config user.name "histdata-bot"; git config user.email "histdata-bot@users.noreply.github.com"
           mkdir -p /tmp/daily && cp out/*.parquet /tmp/daily/
           git fetch origin data-histdata 2>/dev/null && git checkout -f -B data-histdata origin/data-histdata || git checkout -f --orphan data-histdata
           mkdir -p histdata_daily && cp /tmp/daily/*_1d.parquet histdata_daily/
-          git add histdata_daily/ && git commit -qm "HistData daily ${{ inputs.instruments }}" || exit 0
+          git add histdata_daily/ && git commit -qm "HistData daily $(ls /tmp/daily | sed 's/_1d.parquet//' | tr '\n' ' ')" || exit 0
           git push origin data-histdata
+      - name: Esito
+        if: always()
+        run: |
+          test ! -s failed.txt || { echo "strumenti falliti: $(cat failed.txt)"; exit 1; }
