@@ -71,3 +71,12 @@ Tutto è calcolato alla chiusura del giorno t. La posizione è tenuta dalla chiu
 
 ## 6. Esecuzione
 Due invocazioni separate (`insample`, `holdout`), ognuna con un file di guardia e un lock di avvio. L'in-sample non legge dati successivi al 2019-12-31. Codice sviluppato con TDD e sottoposto a code review indipendente prima dell'esecuzione.
+
+## Emendamento 1 — 2026-11-11, registrato PRIMA del download (nessun dato giornaliero esiste ancora)
+Dall'elenco dei file su Drive (`research/data/histdata_manifest.json`) risultano queste lacune:
+- **ETXEUR** finisce nel 2019, con l'ultimo anno probabilmente parziale;
+- **WTIUSD** non ha il 2024;
+- **AUDJPY** ha il 2012 quasi vuoto;
+- per i 7 indici, WTI e Brent il 2010 è parziale, perché le serie partono a fine 2010.
+
+**Regola:** uno strumento è nel portafoglio solo fra la sua storia minima di 252 giorni validi e il suo **ultimo giorno di dati**. Dopo quel giorno esce dal conteggio N_t. Nei buchi interni la posizione resta aperta, e il rendimento si misura da close a close fra due giorni validi consecutivi. Gli indici che partono a fine 2010 entrano nel portafoglio solo verso fine 2011. Tutto il resto è invariato.
