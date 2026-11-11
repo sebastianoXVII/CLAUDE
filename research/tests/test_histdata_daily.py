@@ -38,3 +38,14 @@ def test_weekend_bars_roll_into_monday_and_no_saturday_rows():
     d = D.to_daily(b)
     assert list(d.index) == [pd.Timestamp("2015-03-06"), pd.Timestamp("2015-03-09")]
     assert d.loc["2015-03-09", "open"] == 2
+
+
+def test_from_m1_parquet_dedups_sorts_and_matches_to_daily(tmp_path):
+    b = m1(["2015-03-02 10:00", "2015-03-02 09:00", "2015-03-02 09:00", "2015-03-03 10:00"], [2, 1, 9, 5])
+    p = tmp_path / "X_1m_24h.parquet"
+    b.to_parquet(p)
+    out = tmp_path / "X_1d.parquet"
+    D.from_m1(str(p), str(out))
+    d = pd.read_parquet(out)
+    assert d.loc["2015-03-02", "n_bars"] == 2  # duplicato rimosso
+    assert d.loc["2015-03-02", "open"] == 1 and d.loc["2015-03-02", "close"] == 2  # ordinato nel tempo, primo duplicato tenuto

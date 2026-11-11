@@ -28,18 +28,22 @@ jobs:
             python -c "import json;[print(e['id'],e['title']) for e in json.load(open('research/data/histdata_manifest.json'))['$INS']]" > list.txt
             files=(); ok=1
             while read -r ID TITLE; do
-              for i in 1 2 3 4 5 6; do
+              for i in 1 2 3; do
                 curl -sSL "https://drive.usercontent.google.com/download?id=${ID}&export=download&confirm=t" -o "zips/$TITLE" -w "http %{http_code} bytes %{size_download} type %{content_type}\n" && unzip -tq "zips/$TITLE" >/dev/null 2>&1 && break
+                if grep -q "Quota exceeded" "zips/$TITLE" 2>/dev/null; then echo "QUOTA Drive esaurita su $TITLE: mi fermo senza insistere"; touch quota.flag; break; fi
                 echo "ritento $TITLE ($i); inizio risposta:"; head -c 300 "zips/$TITLE" 2>/dev/null | tr -cd '[:print:]\n' | head -5; echo
                 sleep $((i*30))
               done
+              [ -f quota.flag ] && { ok=0; break; }
               if ! unzip -tq "zips/$TITLE" >/dev/null 2>&1; then echo "zip non valido: $TITLE"; ok=0; break; fi
               files+=("zips/$TITLE")
             done < list.txt
             SYM=$(echo "$INS" | tr a-z A-Z)
             if [ "$ok" = 1 ] && python research/data/histdata_daily.py "out/${SYM}_1d.parquet" "${files[@]}"; then :; else echo "$INS" >> failed.txt; rm -f "out/${SYM}_1d.parquet"; fi
             rm -f zips/*
+            [ -f quota.flag ] && break
           done
+          if [ -f quota.flag ]; then for INS in ${{ inputs.instruments }}; do [ -f "out/$(echo "$INS" | tr a-z A-Z)_1d.parquet" ] || grep -qx "$INS" failed.txt || echo "$INS" >> failed.txt; done; fi
           ls -la out; echo "falliti:"; cat failed.txt
       - name: Pubblica nel branch data-histdata (anche se qualche strumento è fallito)
         if: always()
