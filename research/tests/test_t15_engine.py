@@ -139,7 +139,7 @@ def test_instrument_parts_no_pnl_across_break_and_reentry_after_252():
     # il primo segmento è identico al calcolo senza rotture sul solo primo tratto
     s1 = c.iloc[:n1]; r1 = s1 / s1.shift(1) - 1
     ref = E.instrument_pnl(E.positions(E.signal(s1, "V1"), E.ewma_vol(r1)), r1, 0.0002, 0.03)
-    pd.testing.assert_frame_equal(out.iloc[:n1], ref)
+    pd.testing.assert_frame_equal(out.iloc[:n1].drop(columns="carry"), ref)
 
 
 def test_portfolio_counts_instrument_out_during_new_segment_history():
@@ -163,3 +163,36 @@ def test_excluded_window_instrument_not_counted_in_portfolio():
     port = E.portfolio({"A": pa, "B": pb})
     for day in (idx[350], idx[450]):   # dentro la finestra esclusa e nella nuova storia di B: N_t = 1
         assert port.loc[day] == pytest.approx(pa.loc[day, "gross"])
+
+
+def test_missing_file_days_right_after_break_not_counted():
+    """Review F1: giorni assenti dal file subito dopo la fine di un segmento non ereditano avail per ffill."""
+    idx = _bd(700)
+    rng = np.random.default_rng(4)
+    a = pd.Series(100 * np.exp(np.cumsum(rng.normal(0, 0.01, 700))), index=idx)
+    b = pd.Series(100 * np.exp(np.cumsum(rng.normal(0, 0.01, 700))), index=idx)
+    b.iloc[400:] *= 0.3
+    b = b.drop(idx[397:400])                       # buco nel file subito prima della rottura
+    pa, pb = E.instrument_parts(a, "V1", 0.0, 0.0), E.instrument_parts(b, "V1", 0.0, 0.0)
+    port = E.portfolio({"A": pa, "B": pb})
+    for day in idx[397:400]:
+        assert port.loc[day] == pytest.approx(pa.loc[day, "gross"])
+    assert port.loc[idx[396]] == pytest.approx((pa.loc[idx[396], "gross"] + pb.loc[idx[396], "gross"]) / 2)
+
+
+def test_missing_file_days_inside_segment_still_carry():
+    """Buco interno senza rottura: lo strumento resta in N_t (Emendamento 1, invariato)."""
+    idx = _bd(600)
+    rng = np.random.default_rng(5)
+    a = pd.Series(100 * np.exp(np.cumsum(rng.normal(0, 0.01, 600))), index=idx)
+    b = pd.Series(100 * np.exp(np.cumsum(rng.normal(0, 0.01, 600))), index=idx).drop(idx[400:405])
+    pa, pb = E.instrument_parts(a, "V1", 0.0, 0.0), E.instrument_parts(b, "V1", 0.0, 0.0)
+    port = E.portfolio({"A": pa, "B": pb})
+    assert port.loc[idx[402]] == pytest.approx(pa.loc[idx[402], "gross"] / 2)
+
+
+def test_instrument_parts_all_removed_returns_empty_out_of_portfolio():
+    """Review F2."""
+    c = pd.Series([-1.0, -2.0, -3.0], index=_bd(3))
+    out = E.instrument_parts(c, "V1", 0.0, 0.0)
+    assert len(out) == 3 and not out["avail"].any() and (out["gross"] == 0).all()

@@ -63,14 +63,23 @@ def instrument_parts(close: pd.Series, variant: str, cost: float, fin: float,
                      exclude: list[tuple[str, str]] | None = None) -> pd.DataFrame:
     """P&L per strumento con segmenti indipendenti: segnale e volatilità ripartono da zero dopo ogni rottura."""
     out = []
-    for seg in segments(close, exclude):
+    segs = segments(close, exclude)
+    for k, seg in enumerate(segs):
         r = seg / seg.shift(1) - 1
-        out.append(instrument_pnl(positions(signal(seg, variant), ewma_vol(r)), r, cost, fin))
+        part = instrument_pnl(positions(signal(seg, variant), ewma_vol(r)), r, cost, fin)
+        # carry: cosa ereditano i giorni assenti dal file dopo questa riga. False dopo la fine di un segmento non finale
+        part["carry"] = part["avail"]
+        if k < len(segs) - 1:
+            part.iloc[-1, part.columns.get_loc("carry")] = False
+        out.append(part)
+    if not out:
+        return pd.DataFrame({"gross": 0.0, "tcost": 0.0, "fcost": 0.0, "avail": False, "carry": False}, index=close.index)
     res = pd.concat(out)
     # giorni tolti (close <= 0, finestre escluse): righe esplicite fuori portafoglio, così il ffill di portfolio() non le conta
     res = res.reindex(close.index)
     res[["gross", "tcost", "fcost"]] = res[["gross", "tcost", "fcost"]].fillna(0.0)
-    res["avail"] = res["avail"].astype("boolean").fillna(False).astype(bool)
+    for col in ("avail", "carry"):
+        res[col] = res[col].astype("boolean").fillna(False).astype(bool)
     return res
 
 
@@ -79,7 +88,9 @@ def portfolio(parts: dict[str, pd.DataFrame], cost_mult: float = 1.0) -> pd.Seri
     num, den = pd.Series(0.0, index=idx), pd.Series(0.0, index=idx)
     for p in parts.values():
         q = p.reindex(idx)
-        avail = q["avail"].astype("boolean").ffill().fillna(False).astype(bool)
+        own = q["avail"].astype("boolean")                       # righe presenti: il loro avail
+        carry = q["carry"] if "carry" in q else q["avail"]        # righe assenti dal file: ereditano carry (review F1)
+        avail = own.fillna(carry.astype("boolean").ffill()).fillna(False).astype(bool)
         avail &= pd.Series(np.asarray(idx) <= p.index.max(), index=idx)  # fuori dal portafoglio dopo l'ultimo dato
         net = (q["gross"] - cost_mult * (q["tcost"] + q["fcost"])).fillna(0.0)
         num += net.where(avail, 0.0)
