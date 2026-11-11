@@ -69,6 +69,10 @@ def preflight(stage: str) -> None:
             sys.exit(f"copertura insufficiente per {sym} ({d.index.min().date()} -> {d.index.max().date()}): nessuno stadio avviato.")
 
 
+# Emendamento 2 (research/preregistration/T15_emendamento_2.md): tratto del file GRXEUR che non è il DAX
+EXCLUDE = {"GRXEUR": [("2020-06-15", "2023-12-01")]}
+
+
 def load(sym: str, end: str) -> pd.DataFrame:
     d = pd.read_parquet(DAILY / f"{sym}_1d.parquet")
     return d[d.index <= pd.Timestamp(end)]
@@ -80,10 +84,7 @@ def parts_for(variant: str, end: str) -> tuple[dict, list]:
         f = DAILY / f"{sym}_1d.parquet"
         if not f.exists():
             continue
-        c = E.valid_close(load(sym, end))
-        r = c / c.shift(1) - 1
-        pos = E.positions(E.signal(c, variant), E.ewma_vol(r))
-        parts[sym] = E.instrument_pnl(pos, r, cost, FIN)
+        parts[sym] = E.instrument_parts(E.valid_close(load(sym, end)), variant, cost, FIN, EXCLUDE.get(sym))
         used.append(sym)
     return parts, used
 

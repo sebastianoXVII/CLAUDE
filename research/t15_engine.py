@@ -41,6 +41,39 @@ def instrument_pnl(pos: pd.Series, r: pd.Series, cost: float, fin: float) -> pd.
                          "fcost": held.abs().fillna(0.0) * fin / 252, "avail": held.notna() | pos.notna()}, index=pos.index)
 
 
+BREAK_LOG = np.log(2.0)  # Emendamento 2: rottura se il prezzo raddoppia o si dimezza in un giorno
+
+
+def segments(close: pd.Series, exclude: list[tuple[str, str]] | None = None) -> list[pd.Series]:
+    """Emendamento 2. Spezza la serie dei close validi in segmenti indipendenti.
+    Giorni non validi (close <= 0, o dentro una finestra esclusa) vengono tolti e creano una rottura;
+    c'è rottura anche fra due giorni consecutivi con |ln r| > ln 2."""
+    bad = close <= 0
+    for a, b in exclude or []:
+        bad |= (close.index >= pd.Timestamp(a)) & (close.index <= pd.Timestamp(b))
+    removed_so_far = bad.cumsum()[~bad]
+    c = close[~bad]
+    jump = np.log(c / c.shift(1)).abs() > BREAK_LOG
+    new_seg = jump | (removed_so_far.diff() > 0)
+    seg_id = new_seg.cumsum()
+    return [g for _, g in c.groupby(seg_id, sort=True)]
+
+
+def instrument_parts(close: pd.Series, variant: str, cost: float, fin: float,
+                     exclude: list[tuple[str, str]] | None = None) -> pd.DataFrame:
+    """P&L per strumento con segmenti indipendenti: segnale e volatilità ripartono da zero dopo ogni rottura."""
+    out = []
+    for seg in segments(close, exclude):
+        r = seg / seg.shift(1) - 1
+        out.append(instrument_pnl(positions(signal(seg, variant), ewma_vol(r)), r, cost, fin))
+    res = pd.concat(out)
+    # giorni tolti (close <= 0, finestre escluse): righe esplicite fuori portafoglio, così il ffill di portfolio() non le conta
+    res = res.reindex(close.index)
+    res[["gross", "tcost", "fcost"]] = res[["gross", "tcost", "fcost"]].fillna(0.0)
+    res["avail"] = res["avail"].astype("boolean").fillna(False).astype(bool)
+    return res
+
+
 def portfolio(parts: dict[str, pd.DataFrame], cost_mult: float = 1.0) -> pd.Series:
     idx = sorted(set().union(*[p.index for p in parts.values()]))
     num, den = pd.Series(0.0, index=idx), pd.Series(0.0, index=idx)

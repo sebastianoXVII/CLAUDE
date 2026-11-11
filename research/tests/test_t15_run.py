@@ -95,3 +95,24 @@ def test_holdout_coverage_exceptions_declared():
     assert R.min_end("WTIUSD", "holdout") == pd.Timestamp("2023-11-30")
     assert R.min_end("EURUSD", "holdout") == pd.Timestamp("2024-11-30")
     assert R.min_end("ETXEUR", "insample") == pd.Timestamp("2019-06-30")
+
+
+def test_amendment2_dax_exclusion_declared():
+    assert R.EXCLUDE == {"GRXEUR": [("2020-06-15", "2023-12-01")]}
+
+
+def test_parts_for_applies_segments_and_exclusion(tmp_path, monkeypatch):
+    monkeypatch.setattr(R, "DAILY", tmp_path)
+    monkeypatch.setattr(R, "INSTR", {"GRXEUR": 2e-4})
+    idx = pd.bdate_range("2019-01-01", "2024-12-31")
+    rng = np.random.default_rng(3)
+    c = 12000 * np.exp(np.cumsum(rng.normal(0, 0.01, len(idx))))
+    sub = (idx >= "2020-06-15") & (idx <= "2023-12-01")
+    c[sub] *= 0.27                                     # serie sostituita
+    pd.DataFrame({"close": c, "n_bars": 1300}, index=idx).to_parquet(tmp_path / "GRXEUR_1d.parquet")
+    parts, used = R.parts_for("V1", "2024-12-31")
+    p = parts["GRXEUR"]
+    assert used == ["GRXEUR"]
+    assert not p.loc["2020-06-15":"2023-12-01", "avail"].any()
+    assert (p.loc["2020-06-15":"2023-12-01", "gross"] == 0).all()
+    assert p["gross"].abs().max() < 0.5                # nessun salto di livello nel P&L
