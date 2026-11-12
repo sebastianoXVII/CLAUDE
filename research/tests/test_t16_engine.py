@@ -46,3 +46,62 @@ def test_valid_days_rules():
     xmas = _bars("2015-12-24 17:00", 1440)             # 25 dicembre
     v = E.valid_days(pd.concat([full, thin, sat, xmas]))
     assert list(v) == [pd.Timestamp("2015-03-05")]
+
+
+# --- Task 2: eventi per livello ---
+L, D, DELTA = 1.1000, 0.0020, 0.0005
+
+
+def _arr(rows):
+    a = np.array(rows, dtype=float)
+    return a[:, 0], a[:, 1], a[:, 2]  # high, low, close
+
+
+def test_rebound_from_below_short():
+    h, lo, c = _arr([[1.0990, 1.0975, 1.0985],
+                     [1.0980, 1.0970, 1.0975],   # arma dal basso (close <= 1.0980)
+                     [1.0990, 1.0975, 1.0988],
+                     [1.0995, 1.0985, 1.0992],
+                     [1.1001, 1.0990, 1.0996]])  # tocca 1.1000
+    assert E.level_events(h, lo, c, L, D, DELTA, "R") == [(4, -1)]
+
+
+def test_second_touch_needs_rearm():
+    h, lo, c = _arr([[1.0980, 1.0970, 1.0975],   # arma
+                     [1.1001, 1.0990, 1.0996],   # evento
+                     [1.0999, 1.0990, 1.0995],
+                     [1.1002, 1.0990, 1.0995],   # tocco senza riarmo: niente
+                     [1.0980, 1.0970, 1.0978],   # riarmo
+                     [1.1003, 1.0990, 1.0999]])  # nuovo evento
+    assert E.level_events(h, lo, c, L, D, DELTA, "R") == [(1, -1), (5, -1)]
+
+
+def test_arm_and_touch_same_bar_no_event():
+    h, lo, c = _arr([[1.0995, 1.0990, 1.0992],
+                     [1.1005, 1.0970, 1.0975]])  # close arma, high tocca: nessun evento
+    assert E.level_events(h, lo, c, L, D, DELTA, "R") == []
+
+
+def test_rebound_from_above_long():
+    h, lo, c = _arr([[1.1030, 1.1020, 1.1025],   # arma dall'alto (close >= 1.1020)
+                     [1.1010, 1.0999, 1.1005]])  # tocca da sopra
+    assert E.level_events(h, lo, c, L, D, DELTA, "R") == [(1, 1)]
+
+
+def test_stop_cascade_from_below_long_needs_delta():
+    h, lo, c = _arr([[1.0980, 1.0970, 1.0975],   # arma
+                     [1.1003, 1.0990, 1.1001],   # tocca L ma non L+delta: niente S
+                     [1.1006, 1.0998, 1.1004]])  # supera L+delta
+    assert E.level_events(h, lo, c, L, D, DELTA, "S") == [(2, 1)]
+
+
+def test_stop_cascade_from_above_short():
+    h, lo, c = _arr([[1.1030, 1.1020, 1.1025],
+                     [1.1000, 1.0994, 1.0996]])  # low <= L - delta
+    assert E.level_events(h, lo, c, L, D, DELTA, "S") == [(1, -1)]
+
+
+def test_no_arm_no_event():
+    h, lo, c = _arr([[1.0999, 1.0990, 1.0995], [1.1010, 1.0995, 1.1005]])
+    assert E.level_events(h, lo, c, L, D, DELTA, "R") == []
+    assert E.level_events(h, lo, c, L, D, DELTA, "S") == []

@@ -28,3 +28,30 @@ def valid_days(bars_et: pd.DataFrame) -> pd.DatetimeIndex:
     d = pd.Series(1, index=pd.DatetimeIndex(trading_day(bars_et.index))).groupby(level=0).size()
     ok = (d.index.weekday < 5) & ~((d.index.month == 12) & (d.index.day == 25)) & ~((d.index.month == 1) & (d.index.day == 1))
     return d.index[ok & (d.to_numpy() >= MIN_BARS)]
+
+
+def _prev_index(mask: np.ndarray) -> np.ndarray:
+    """Per ogni i: indice massimo j < i con mask[j], altrimenti -1."""
+    idx = np.where(mask, np.arange(len(mask)), -1)
+    acc = np.maximum.accumulate(idx)
+    return np.concatenate(([-1], acc[:-1]))
+
+
+def level_events(high: np.ndarray, low: np.ndarray, close: np.ndarray, L: float, D: float, delta: float,
+                 kind: str) -> list[tuple[int, int]]:
+    """Eventi R (rimbalzo, lato contro l'avvicinamento) o S (superamento di delta, lato del superamento) sul livello L.
+    Evento in i se hit[i] e l'ultimo armamento (barra < i) è più recente dell'ultimo hit (barra < i)."""
+    out = []
+    for frm in ("below", "above"):
+        if frm == "below":
+            arm = close <= L - D + EPS
+            hit = high >= (L if kind == "R" else L + delta) - EPS
+            side = -1 if kind == "R" else 1
+        else:
+            arm = close >= L + D - EPS
+            hit = low <= (L if kind == "R" else L - delta) + EPS
+            side = 1 if kind == "R" else -1
+        pa, ph = _prev_index(arm), _prev_index(hit)
+        ev = hit & (pa >= 0) & (pa > ph)
+        out += [(int(i), side) for i in np.flatnonzero(ev)]
+    return sorted(out)
