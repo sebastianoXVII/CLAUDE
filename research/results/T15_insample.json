@@ -1,0 +1,97 @@
+{
+  "periodo": "2011-01-01 -> 2019-12-31",
+  "strumenti_usati": [
+    "EURUSD",
+    "GBPUSD",
+    "USDJPY",
+    "AUDUSD",
+    "USDCAD",
+    "USDCHF",
+    "NZDUSD",
+    "EURJPY",
+    "EURGBP",
+    "AUDJPY",
+    "SPXUSD",
+    "NSXUSD",
+    "GRXEUR",
+    "UKXGBP",
+    "FRXEUR",
+    "ETXEUR",
+    "XAUUSD",
+    "JPXJPY",
+    "AUXAUD",
+    "HKXHKD",
+    "WTIUSD",
+    "BCOUSD",
+    "XAGUSD"
+  ],
+  "varianti": {
+    "V1": {
+      "giorni": 2335,
+      "media_giornaliera": -0.0003163509054579354,
+      "sharpe_ann": -0.5164017299638771,
+      "t_nw": -1.586932646016488,
+      "p_one": 0.9437360499409484,
+      "stress_mean": -0.0006867520747960276,
+      "media_lorda": 5.405026388015671e-05,
+      "years": 9,
+      "years_pos": 2,
+      "per_anno": {
+        "2011": -0.23619,
+        "2012": -0.09155,
+        "2013": 0.13636,
+        "2014": -0.02916,
+        "2015": -0.01364,
+        "2016": -0.3119,
+        "2017": 0.16249,
+        "2018": -0.227,
+        "2019": -0.12809
+      },
+      "prop_descrittivi": {
+        "vol_ann_scalata": 0.10000000000000002,
+        "rend_ann_scalato": -0.05164017299638775,
+        "max_dd": -0.44044638386946044,
+        "giorno_peggiore": -0.040866673566499666,
+        "quota_giorni_sotto_-2%": 0.006423982869379015,
+        "quota_giorni_sotto_-5%": 0.0,
+        "quota_finestre_10_giorni_borsa_positive": 0.45571797076526227
+      },
+      "p_holm": 1.0,
+      "SOPRAVVIVE": false
+    },
+    "V2": {
+      "giorni": 2335,
+      "media_giornaliera": -0.0002974262836152259,
+      "sharpe_ann": -0.6314219612042666,
+      "t_nw": -1.9512399270868466,
+      "p_one": 0.9744857442902093,
+      "stress_mean": -0.0005735089528441234,
+      "media_lorda": -2.1343614386328368e-05,
+      "years": 9,
+      "years_pos": 1,
+      "per_anno": {
+        "2011": -0.19672,
+        "2012": -0.03236,
+        "2013": 0.05751,
+        "2014": -0.06136,
+        "2015": -0.05069,
+        "2016": -0.22227,
+        "2017": -0.01794,
+        "2018": -0.07785,
+        "2019": -0.09281
+      },
+      "prop_descrittivi": {
+        "vol_ann_scalata": 0.10000000000000002,
+        "rend_ann_scalato": -0.06314219612042667,
+        "max_dd": -0.4984348558670859,
+        "giorno_peggiore": -0.035315466627400274,
+        "quota_giorni_sotto_-2%": 0.009850107066381156,
+        "quota_giorni_sotto_-5%": 0.0,
+        "quota_finestre_10_giorni_borsa_positive": 0.42605331040412725
+      },
+      "p_holm": 1.0,
+      "SOPRAVVIVE": false
+    }
+  },
+  "sopravvissute": []
+}
