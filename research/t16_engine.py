@@ -55,3 +55,47 @@ def level_events(high: np.ndarray, low: np.ndarray, close: np.ndarray, L: float,
         ev = hit & (pa >= 0) & (pa > ph)
         out += [(int(i), side) for i in np.flatnonzero(ev)]
     return sorted(out)
+
+
+WIN_LO, WIN_HI = 2 * 60, 15 * 60 + 59          # T = ts + 1 min fra 02:00 e 15:59 ET
+HOLD = pd.Timedelta(minutes=60)
+EXIT_FROM = pd.Timedelta(minutes=56)          # uscita: ultima barra con ts in [ts+56, ts+60]
+COLS = ["day", "entry_time", "side", "level", "p_in", "p_out", "gross", "net"]
+
+
+def day_trades(day: pd.DataFrame, lv: np.ndarray, D: float, delta: float, kind: str, cost: float) -> pd.DataFrame:
+    """Trade di un giorno di trading per un tier: eventi su tutti i livelli rilevanti, finestra, uscita a +60, nessuna sovrapposizione."""
+    h, lo, c = (day[k].to_numpy(float) for k in ("high", "low", "close"))
+    ts = day.index
+    if len(ts) == 0:
+        return pd.DataFrame(columns=COLS)
+    rel = lv[(lv >= lo.min() - D - delta) & (lv <= h.max() + D + delta)]
+    tmin = ts.hour * 60 + ts.minute + 1
+    ns = ts.as_unit("ns").asi8                        # unità esplicita: pandas 3 può usare us o ns
+    cand = []
+    for L in rel:
+        for i, side in level_events(h, lo, c, L, D, delta, kind):
+            if not (WIN_LO <= tmin[i] <= WIN_HI):
+                continue
+            j = np.searchsorted(ns, ns[i] + HOLD.value, side="right") - 1
+            if j <= i or ns[j] < ns[i] + EXIT_FROM.value:
+                continue                                   # manca il prezzo di uscita: trade scartato
+            cand.append((i, float(L), side, j))
+    cand.sort(key=lambda e: (e[0], e[1], e[2]))
+    rows, last_t = [], None
+    for i, L, side, j in cand:
+        t_in = ts[i] + pd.Timedelta(minutes=1)
+        if last_t is not None and t_in < last_t + HOLD:
+            continue
+        last_t = t_in
+        g = side * (c[j] - c[i])
+        rows.append((pd.Timestamp(trading_day(ts[i:i + 1])[0]), t_in, side, L, c[i], c[j], g, g - cost))
+    return pd.DataFrame(rows, columns=COLS)
+
+
+def daily_pnl(trades: pd.DataFrame, days: pd.DatetimeIndex, cost_mult: float) -> pd.Series:
+    """P&L giornaliero sui giorni validi (zero senza trade). Costo = gross - net, scalato da cost_mult."""
+    if len(trades) == 0:
+        return pd.Series(0.0, index=days)
+    x = trades["gross"] - cost_mult * (trades["gross"] - trades["net"])
+    return x.groupby(pd.DatetimeIndex(trades["day"])).sum().reindex(days, fill_value=0.0)

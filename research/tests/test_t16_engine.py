@@ -105,3 +105,81 @@ def test_no_arm_no_event():
     h, lo, c = _arr([[1.0999, 1.0990, 1.0995], [1.1010, 1.0995, 1.1005]])
     assert E.level_events(h, lo, c, L, D, DELTA, "R") == []
     assert E.level_events(h, lo, c, L, D, DELTA, "S") == []
+
+
+# --- Task 3: trade di un giorno e P&L giornaliero ---
+COST = 0.0001
+
+
+def _day(base=1.0975, start="2015-03-04 17:00", n=1440):
+    idx = pd.date_range(pd.Timestamp(start, tz=TZ), periods=n, freq="min")
+    return pd.DataFrame({"open": base, "high": base, "low": base, "close": base}, index=idx)
+
+
+def _touch(df, t, price):
+    t = pd.Timestamp(t, tz=TZ)
+    df.loc[t, ["high", "close"]] = [price, price - 0.0002]
+    return df
+
+
+def _set_close(df, t, price):
+    df.loc[pd.Timestamp(t, tz=TZ), ["high", "low", "close"]] = [price, price, price]
+    return df
+
+
+def test_trade_exit_at_plus_60_and_pnl():
+    d = _touch(_day(), "2015-03-05 10:00", 1.1001)          # entrata al close 1.0999, T = 10:01
+    d = _set_close(d, "2015-03-05 11:00", 1.0989)           # ts+60: uscita al close 1.0989
+    tr = E.day_trades(d, np.array([1.1000]), D, DELTA, "R", COST)
+    assert len(tr) == 1
+    r = tr.iloc[0]
+    assert r.entry_time == pd.Timestamp("2015-03-05 10:01", tz=TZ) and r.side == -1
+    assert r.p_in == pytest.approx(1.0999) and r.p_out == pytest.approx(1.0989)
+    assert r.gross == pytest.approx(0.0010) and r.net == pytest.approx(0.0010 - COST)
+    assert r.day == pd.Timestamp("2015-03-05")
+
+
+@pytest.mark.parametrize("t,ok", [("2015-03-05 15:58", True), ("2015-03-05 15:59", False), ("2015-03-05 01:59", True),
+                                  ("2015-03-05 01:58", False), ("2015-03-04 20:00", False)])
+def test_entry_window_edges(t, ok):
+    d = _touch(_day(), t, 1.1001)
+    tr = E.day_trades(d, np.array([1.1000]), D, DELTA, "R", COST)
+    assert (len(tr) == 1) == ok
+
+
+def test_missing_exit_bar_drops_trade_and_frees_next_event():
+    d = _touch(_day(), "2015-03-05 10:00", 1.1001)
+    d = d.drop(pd.date_range(pd.Timestamp("2015-03-05 10:56", tz=TZ), periods=5, freq="min"))   # nessuna barra in [ts+56, ts+60]
+    d = _set_close(d, "2015-03-05 10:20", 1.0975)                                                # riarmo
+    d = _touch(d, "2015-03-05 10:30", 1.1001)                                                    # secondo evento
+    tr = E.day_trades(d, np.array([1.1000]), D, DELTA, "R", COST)
+    assert list(tr.entry_time) == [pd.Timestamp("2015-03-05 10:31", tz=TZ)]
+
+
+def test_no_overlap_across_levels():
+    d = _day(base=1.1025)                                                # armato dal basso per 1.1050, dall'alto per 1.1000
+    d = _touch(d, "2015-03-05 10:00", 1.1051)                            # evento su 1.1050
+    t = pd.Timestamp("2015-03-05 10:30", tz=TZ)
+    d.loc[t, ["low", "close"]] = [1.0999, 1.1003]                        # evento su 1.1000, 30 minuti dopo
+    tr = E.day_trades(d, np.array([1.1000, 1.1050]), D, DELTA, "R", COST)
+    assert list(tr.entry_time) == [pd.Timestamp("2015-03-05 10:01", tz=TZ)]
+
+
+def test_daily_pnl_zero_fill_and_cost_mult():
+    d = _touch(_day(), "2015-03-05 10:00", 1.1001)
+    d = _set_close(d, "2015-03-05 11:00", 1.0989)
+    tr = E.day_trades(d, np.array([1.1000]), D, DELTA, "R", COST)
+    days = pd.DatetimeIndex(["2015-03-05", "2015-03-06"])
+    p1, p2 = E.daily_pnl(tr, days, 1.0), E.daily_pnl(tr, days, 2.0)
+    assert p1.loc["2015-03-06"] == 0.0
+    assert p1.loc["2015-03-05"] == pytest.approx(0.0010 - COST)
+    assert p1.loc["2015-03-05"] - p2.loc["2015-03-05"] == pytest.approx(COST)
+
+
+@pytest.mark.parametrize("unit", ["ns", "us"])
+def test_day_trades_independent_of_time_unit(unit):
+    d = _touch(_day(), "2015-03-05 10:00", 1.1001)
+    d = _set_close(d, "2015-03-05 11:00", 1.0989)
+    d.index = d.index.as_unit(unit)
+    tr = E.day_trades(d, np.array([1.1000]), D, DELTA, "R", COST)
+    assert len(tr) == 1 and tr.iloc[0].p_out == pytest.approx(1.0989)
