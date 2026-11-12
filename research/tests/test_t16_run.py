@@ -108,3 +108,20 @@ def test_end_to_end_synthetic(tmp_path, monkeypatch):
     assert res["test"]["EURUSD_B_R"]["n_trades"] == 0
     assert "EURUSD_R" in res["controlli"] and "welch_t_A_vs_C" in res["controlli"]["EURUSD_R"]
     assert (tmp_path / "T16_insample.started").exists()
+
+
+def test_level_state_resets_at_trading_day_boundary():
+    """Focus 5: armamento alle 16:00 del giorno 1, tocco alle 03:00 del giorno 2 -> nessun trade."""
+    frames = []
+    for d, base in (("2015-03-05", 1.0975), ("2015-03-06", 1.0990)):   # giorno 2: mai armato (close > 1.0980)
+        idx = pd.date_range(pd.Timestamp(d, tz=TZ) - pd.Timedelta(hours=7), periods=1440, freq="min")
+        p = np.full(1440, base)
+        frames.append(pd.DataFrame({"open": p, "high": p.copy(), "low": p.copy(), "close": p.copy()}, index=idx))
+    b = pd.concat(frames)
+    t = pd.Timestamp("2015-03-06 03:00", tz=TZ)
+    b.loc[t, ["high", "close"]] = [1.1001, 1.0995]
+    tr = R.trades_all(b, "EURUSD")
+    assert len(tr[("A", "R")]) == 0
+    b2 = b.copy()
+    b2.loc[pd.Timestamp("2015-03-06 02:00", tz=TZ), "close"] = 1.0975          # armamento nello stesso giorno
+    assert len(R.trades_all(b2, "EURUSD")[("A", "R")]) == 1
