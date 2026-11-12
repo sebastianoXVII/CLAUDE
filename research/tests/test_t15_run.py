@@ -94,7 +94,7 @@ def test_holdout_coverage_exceptions_declared():
     assert R.min_end("ETXEUR", "holdout") is None
     assert R.min_end("WTIUSD", "holdout") == pd.Timestamp("2023-11-30")
     assert R.min_end("EURUSD", "holdout") == pd.Timestamp("2024-11-30")
-    assert R.min_end("ETXEUR", "insample") == pd.Timestamp("2019-06-30")
+    assert R.min_end("ETXEUR", "insample") == pd.Timestamp("2019-01-31")
 
 
 def test_amendment2_dax_exclusion_declared():

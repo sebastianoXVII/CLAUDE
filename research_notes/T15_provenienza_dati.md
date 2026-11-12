@@ -35,3 +35,18 @@ I 17 strumenti restanti si riscaricano in due lotti, a circa 24 ore di distanza.
   - **Non serve un nuovo emendamento:** è lo stesso tipo di anomalia già regolato.
 - **WTIUSD.** Il 2020-04-21 segna −38%. Nel file il prezzo non va mai sotto zero: il CFD sembra già sul contratto successivo. Il 2020-03-09 segna −27%, come BCOUSD (−27%). Sono movimenti reali e restano.
 - **Buchi interni.** Il buco di febbraio 2017 e quello del Capodanno cinese 2019 su HKXHKD sono gestiti dall'Emendamento 1: la posizione resta aperta e il rendimento si misura fra due close.
+
+## Lotto 2 (8 FX) e soglia di copertura di ETXEUR
+**Download.** Anche il lotto 2 è passato senza "Quota exceeded": i 23 strumenti sono completi.
+
+**Controllo descrittivo sui 23** (`research/results/T15_qualita_dati.json`). Nessuna anomalia di tipo nuovo. Restano nel campione come movimenti reali:
+- USDCHF −17,7% il 2015-01-15 (shock della BNS);
+- USDCHF +9,5% il 2011-09-06 (introduzione del floor);
+- Brexit su EURGBP ed EURJPY.
+
+I buchi di AUDJPY nel 2012 sono quelli già dichiarati nell'Emendamento 1.
+
+**Soglia di copertura di ETXEUR.** Il preflight dell'in-sample chiedeva per ETXEUR dati almeno fino al 2019-06-30. Era una stima mia fatta sull'elenco dei file, non un criterio pre-registrato. Il file 2019 in realtà finisce il **2019-02-01**.
+- L'Emendamento 1 aveva già dichiarato che ETXEUR finisce nel 2019 con un anno parziale, e che esce dal portafoglio dopo l'ultimo dato.
+- La soglia del controllo è quindi allineata a 2019-01-31, prima di qualsiasi calcolo di P&L.
+- Nella pratica ETXEUR esce comunque il 2018-12-14, per la rottura della Regola 1.

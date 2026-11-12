@@ -47,9 +47,9 @@ def prop_descriptives(r: pd.Series) -> dict:
 
 
 def min_end(sym: str, stage: str):
-    """Ultima data minima richiesta (emendamento 1: ETXEUR finisce nel 2019, WTIUSD nel 2023)."""
+    """Ultima data minima richiesta (emendamento 1: ETXEUR finisce nel 2019 con anno parziale, WTIUSD nel 2023). ETXEUR: il file 2019 finisce il 2019-02-01, soglia 2019-01-31 (nota in research_notes/T15_provenienza_dati.md)."""
     if stage == "insample":
-        return pd.Timestamp("2019-06-30" if sym == "ETXEUR" else "2019-11-30")
+        return pd.Timestamp("2019-01-31" if sym == "ETXEUR" else "2019-11-30")
     if sym == "ETXEUR":
         return None
     return pd.Timestamp("2023-11-30" if sym == "WTIUSD" else "2024-11-30")
